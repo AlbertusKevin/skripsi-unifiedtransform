@@ -53,14 +53,11 @@ class UserController extends Controller
 
     public function getStudentList(Request $request) {
         $current_school_session_id = $this->getSchoolCurrentSession();
-
         $class_id = $request->query('class_id', 0);
         $section_id = $request->query('section_id', 0);
 
         try{
-
             $school_classes = $this->schoolClassRepository->getAllBySession($current_school_session_id);
-
             $studentList = $this->userRepository->getAllStudents($current_school_session_id, $class_id, $section_id);
 
             $data = [
@@ -77,7 +74,6 @@ class UserController extends Controller
 
     public function showStudentProfile($id) {
         $student = $this->userRepository->findStudent($id);
-
         $current_school_session_id = $this->getSchoolCurrentSession();
         $promotionRepository = new PromotionRepository();
         $promotion_info = $promotionRepository->getPromotionInfoById($current_school_session_id, $id);
@@ -101,7 +97,6 @@ class UserController extends Controller
 
     public function createStudent() {
         $current_school_session_id = $this->getSchoolCurrentSession();
-
         $school_classes = $this->schoolClassRepository->getAllBySession($current_school_session_id);
 
         $data = [
@@ -122,7 +117,6 @@ class UserController extends Controller
     {
         try {
             $this->userRepository->createStudent($request->validated());
-
             return back()->with('status', 'Student creation was successful!');
         } catch (\Exception $e) {
             return back()->withError($e->getMessage());
@@ -142,13 +136,13 @@ class UserController extends Controller
             'parent_info'   => $parent_info,
             'promotion_info'=> $promotion_info,
         ];
+
         return view('students.edit', $data);
     }
 
     public function updateStudent(Request $request) {
         try {
             $this->userRepository->updateStudent($request->toArray());
-
             return back()->with('status', 'Student update was successful!');
         } catch (\Exception $e) {
             return back()->withError($e->getMessage());
@@ -164,10 +158,10 @@ class UserController extends Controller
 
         return view('teachers.edit', $data);
     }
+
     public function updateTeacher(Request $request) {
         try {
             $this->userRepository->updateTeacher($request->toArray());
-
             return back()->with('status', 'Teacher update was successful!');
         } catch (\Exception $e) {
             return back()->withError($e->getMessage());

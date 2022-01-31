@@ -62,11 +62,8 @@ class MarkController extends Controller
         $semester_id = $request->query('semester_id', 0);
 
         $current_school_session_id = $this->getSchoolCurrentSession();
-
         $semesters = $this->semesterRepository->getAll($current_school_session_id);
-
         $school_classes = $this->schoolClassRepository->getAllBySession($current_school_session_id);
-
         $markRepository = new MarkRepository();
         $marks = $markRepository->getAllFinalMarks($current_school_session_id, $semester_id, $class_id, $section_id, $course_id);
 
@@ -122,24 +119,16 @@ class MarkController extends Controller
         $semester_id = $request->query('semester_id', 0);
         
         try{
-
             $current_school_session_id = $this->getSchoolCurrentSession();
             $this->checkIfLoggedInUserIsAssignedTeacher($request, $current_school_session_id);
-
             $academic_setting = $this->academicSettingRepository->getAcademicSetting();
-
             $examRepository = new ExamRepository();
-
             $exams = $examRepository->getAll($current_school_session_id, $semester_id, $class_id);
-
             $markRepository = new MarkRepository();
             $studentsWithMarks = $markRepository->getAll($current_school_session_id, $semester_id, $class_id, $section_id, $course_id);
             $studentsWithMarks = $studentsWithMarks->groupBy('student_id');
-
             $sectionStudents = $this->userRepository->getAllStudents($current_school_session_id, $class_id, $section_id);
-
             $final_marks_submitted = false;
-            
             $final_marks_submit_count = $markRepository->getFinalMarksCount($current_school_session_id, $semester_id, $class_id, $section_id, $course_id);
 
             if($final_marks_submit_count > 0) {
@@ -179,7 +168,6 @@ class MarkController extends Controller
         $semester_id = $request->query('semester_id', 0);
 
         $current_school_session_id = $this->getSchoolCurrentSession();
-
         $markRepository = new MarkRepository();
         $studentsWithMarks = $markRepository->getAll($current_school_session_id, $semester_id, $class_id, $section_id, $course_id);
         $studentsWithMarks = $studentsWithMarks->groupBy('student_id');
@@ -321,39 +309,5 @@ class MarkController extends Controller
         ];
 
         return view('marks.student', $data);
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  \App\Models\Mark  $mark
-     * @return \Illuminate\Http\Response
-     */
-    public function edit(Mark $mark)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Models\Mark  $mark
-     * @return \Illuminate\Http\Response
-     */
-    public function update(Request $request, Mark $mark)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  \App\Models\Mark  $mark
-     * @return \Illuminate\Http\Response
-     */
-    public function destroy(Mark $mark)
-    {
-        //
     }
 }

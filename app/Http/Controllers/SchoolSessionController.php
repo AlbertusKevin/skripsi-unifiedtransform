@@ -36,7 +36,6 @@ class SchoolSessionController extends Controller
         } catch (\Exception $e) {
             return back()->withError($e->getMessage());
         }
-        
     }
 
     /**
@@ -55,6 +54,5 @@ class SchoolSessionController extends Controller
         } catch (\Exception $e) {
             return back()->withError($e->getMessage());
         }
-        
     }
 }

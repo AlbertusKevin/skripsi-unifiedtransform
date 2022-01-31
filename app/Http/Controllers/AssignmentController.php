@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
-use App\Models\Assignment;
 use Illuminate\Http\Request;
 use App\Traits\SchoolSession;
 use App\Http\Requests\StoreFileRequest;
@@ -82,50 +81,5 @@ class AssignmentController extends Controller
         } catch (\Exception $e) {
             return back()->withError($e->getMessage());
         }
-    }
-
-    /**
-     * Display the specified resource.
-     *
-     * @param  \App\Models\Assignment  $assignment
-     * @return \Illuminate\Http\Response
-     */
-    public function show(Assignment $assignment)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  \App\Models\Assignment  $assignment
-     * @return \Illuminate\Http\Response
-     */
-    public function edit(Assignment $assignment)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Models\Assignment  $assignment
-     * @return \Illuminate\Http\Response
-     */
-    public function update(Request $request, Assignment $assignment)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  \App\Models\Assignment  $assignment
-     * @return \Illuminate\Http\Response
-     */
-    public function destroy(Assignment $assignment)
-    {
-        //
     }
 }

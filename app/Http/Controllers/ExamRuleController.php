@@ -121,15 +121,4 @@ class ExamRuleController extends Controller
             return back()->withError($e->getMessage());
         }
     }
-
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  \App\Models\ExamRule  $examRule
-     * @return \Illuminate\Http\Response
-     */
-    public function destroy(ExamRule $examRule)
-    {
-        //
-    }
 }

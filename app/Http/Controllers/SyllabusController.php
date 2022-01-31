@@ -51,13 +51,13 @@ class SyllabusController extends Controller
     public function create()
     {
         $current_school_session_id = $this->getSchoolCurrentSession();
-
         $school_classes = $this->schoolClassRepository->getAllBySession($current_school_session_id);
 
         $data = [
             'current_school_session_id' => $current_school_session_id,
             'school_classes'    => $school_classes,
         ];
+
         return view('syllabi.create', $data);
     }
 
@@ -83,50 +83,5 @@ class SyllabusController extends Controller
         } catch (\Exception $e) {
             return back()->withError($e->getMessage());
         }
-    }
-
-    /**
-     * Display the specified resource.
-     *
-     * @param  \App\Models\Syllabus  $syllabus
-     * @return \Illuminate\Http\Response
-     */
-    public function show(Syllabus $syllabus)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  \App\Models\Syllabus  $syllabus
-     * @return \Illuminate\Http\Response
-     */
-    public function edit(Syllabus $syllabus)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Models\Syllabus  $syllabus
-     * @return \Illuminate\Http\Response
-     */
-    public function update(Request $request, Syllabus $syllabus)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  \App\Models\Syllabus  $syllabus
-     * @return \Illuminate\Http\Response
-     */
-    public function destroy(Syllabus $syllabus)
-    {
-        //
     }
 }

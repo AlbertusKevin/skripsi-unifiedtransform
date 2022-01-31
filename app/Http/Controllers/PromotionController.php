@@ -56,12 +56,9 @@ class PromotionController extends Controller
         }
 
         $previousSessionClasses = $promotionRepository->getClasses($previousSession['id']);
-
         $previousSessionSections = $promotionRepository->getSections($previousSession['id'], $class_id);
-
         $current_school_session_id = $this->getSchoolCurrentSession();
         $currentSessionSections = $promotionRepository->getSectionsBySession($current_school_session_id);
-
         $currentSessionSectionsCounts = $currentSessionSections->count();
 
         $data = [
@@ -88,18 +85,14 @@ class PromotionController extends Controller
         $session_id = $request->query('previousSessionId');
 
         try{
-
             if($class_id == null || $section_id == null ||$session_id == null) {
                 return abort(404);
             }
 
             $students = $this->userRepository->getAllStudents($session_id, $class_id, $section_id);
-
             $schoolClass = $this->schoolClassRepository->findById($class_id);
             $section = $this->schoolSectionRepository->findById($section_id);
-
             $latest_school_session = $this->schoolSessionRepository->getLatestSession();
-
             $school_classes = $this->schoolClassRepository->getAllBySession($latest_school_session->id);
 
             $data = [
@@ -148,50 +141,5 @@ class PromotionController extends Controller
         } catch (\Exception $e) {
             return back()->withError($e->getMessage());
         }
-    }
-
-    /**
-     * Display the specified resource.
-     *
-     * @param  \App\Models\Promotion  $promotion
-     * @return \Illuminate\Http\Response
-     */
-    public function show(Promotion $promotion)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  \App\Models\Promotion  $promotion
-     * @return \Illuminate\Http\Response
-     */
-    public function edit(Promotion $promotion)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Models\Promotion  $promotion
-     * @return \Illuminate\Http\Response
-     */
-    public function update(Request $request, Promotion $promotion)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  \App\Models\Promotion  $promotion
-     * @return \Illuminate\Http\Response
-     */
-    public function destroy(Promotion $promotion)
-    {
-        //
     }
 }

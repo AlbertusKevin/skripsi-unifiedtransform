@@ -37,21 +37,13 @@ class ExamController extends Controller
     {
         $class_id = $request->query('class_id', 0);
         $semester_id = $request->query('semester_id', 0);
-
         $current_school_session_id = $this->getSchoolCurrentSession();
-
         $semesters = $this->semesterRepository->getAll($current_school_session_id);
-
         $school_classes = $this->schoolClassRepository->getAllBySession($current_school_session_id);
-
         $examRepository = new ExamRepository();
-
         $exams = $examRepository->getAll($current_school_session_id, $semester_id, $class_id);
-
         $assignedTeacherRepository = new AssignedTeacherRepository();
-
         $teacher_id = (auth()->user()->role == "teacher")?auth()->user()->id : 0;
-
         $teacherCourses = $assignedTeacherRepository->getTeacherCourses($current_school_session_id, $teacher_id, $semester_id);
 
         $data = [
@@ -73,7 +65,6 @@ class ExamController extends Controller
     public function create()
     {
         $current_school_session_id = $this->getSchoolCurrentSession();
-
         $semesters = $this->semesterRepository->getAll($current_school_session_id);
 
         if(auth()->user()->role == "teacher") {
@@ -116,40 +107,6 @@ class ExamController extends Controller
         } catch (\Exception $e) {
             return back()->withError($e->getMessage());
         }
-    }
-
-    /**
-     * Display the specified resource.
-     *
-     * @param  \App\Models\Exam  $exam
-     * @return \Illuminate\Http\Response
-     */
-    public function show(Exam $exam)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  \App\Models\Exam  $exam
-     * @return \Illuminate\Http\Response
-     */
-    public function edit(Exam $exam)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Models\Exam  $exam
-     * @return \Illuminate\Http\Response
-     */
-    public function update(Request $request, Exam $exam)
-    {
-        //
     }
 
     /**

@@ -69,40 +69,6 @@ class GradeRuleController extends Controller
     }
 
     /**
-     * Display the specified resource.
-     *
-     * @param  \App\Models\GradeRule  $gradeRule
-     * @return \Illuminate\Http\Response
-     */
-    public function show(GradeRule $gradeRule)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  \App\Models\GradeRule  $gradeRule
-     * @return \Illuminate\Http\Response
-     */
-    public function edit(GradeRule $gradeRule)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Models\GradeRule  $gradeRule
-     * @return \Illuminate\Http\Response
-     */
-    public function update(Request $request, GradeRule $gradeRule)
-    {
-        //
-    }
-
-    /**
      * Remove the specified resource from storage.
      *
      * @param  \Illuminate\Http\Request  $request

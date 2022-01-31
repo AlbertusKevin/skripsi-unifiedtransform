@@ -27,15 +27,6 @@ class AssignedTeacherController extends Controller
         $this->schoolSessionRepository = $schoolSessionRepository;
         $this->semesterRepository = $semesterRepository;
     }
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function index()
-    {
-        //
-    }
 
     /**
      * Display a listing of the resource.
@@ -71,16 +62,6 @@ class AssignedTeacherController extends Controller
         ];
 
         return view('courses.teacher', $data);
-    }
-
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function create()
-    {
-        //
     }
 
     /**

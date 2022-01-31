@@ -38,17 +38,11 @@ class HomeController extends Controller
     public function index()
     {
         $current_school_session_id = $this->getSchoolCurrentSession();
-
         $classCount = $this->schoolClassRepository->getAllBySession($current_school_session_id)->count();
-
         $studentCount = $this->userRepository->getAllStudentsBySessionCount($current_school_session_id);
-
         $promotionRepository = new PromotionRepository();
-
         $maleStudentsBySession = $promotionRepository->getMaleStudentsBySessionCount($current_school_session_id);
-
         $teacherCount = $this->userRepository->getAllTeachers()->count();
-
         $noticeRepository = new NoticeRepository();
         $notices = $noticeRepository->getAll($current_school_session_id);
 

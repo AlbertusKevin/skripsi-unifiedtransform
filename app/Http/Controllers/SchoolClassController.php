@@ -37,20 +37,9 @@ class SchoolClassController extends Controller
     public function index()
     {
         $current_school_session_id = $this->getSchoolCurrentSession();
-
         $data = $this->schoolClassRepository->getClassesAndSections($current_school_session_id);
 
         return view('classes.index', $data);
-    }
-
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function create()
-    {
-        //
     }
 
     /**
@@ -71,17 +60,6 @@ class SchoolClassController extends Controller
     }
 
     /**
-     * Display the specified resource.
-     *
-     * @param  \App\Models\SchoolClass  $schoolClass
-     * @return \Illuminate\Http\Response
-     */
-    public function show(SchoolClass $schoolClass)
-    {
-        //
-    }
-
-    /**
      * Show the form for editing the specified resource.
      *
      * @param  $class_id
@@ -90,7 +68,6 @@ class SchoolClassController extends Controller
     public function edit($class_id)
     {
         $current_school_session_id = $this->getSchoolCurrentSession();
-
         $schoolClass = $this->schoolClassRepository->findById($class_id);
 
         $data = [
@@ -116,16 +93,5 @@ class SchoolClassController extends Controller
         } catch (\Exception $e) {
             return back()->withError($e->getMessage());
         }
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  \App\Models\SchoolClass  $schoolClass
-     * @return \Illuminate\Http\Response
-     */
-    public function destroy(SchoolClass $schoolClass)
-    {
-        //
     }
 }

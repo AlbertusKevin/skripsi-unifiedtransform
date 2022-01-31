@@ -85,49 +85,4 @@ class GradingSystemController extends Controller
             return back()->withError($e->getMessage());
         }
     }
-
-    /**
-     * Display the specified resource.
-     *
-     * @param  \App\Models\GradingSystem  $gradingSystem
-     * @return \Illuminate\Http\Response
-     */
-    public function show(GradingSystem $gradingSystem)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  \App\Models\GradingSystem  $gradingSystem
-     * @return \Illuminate\Http\Response
-     */
-    public function edit(GradingSystem $gradingSystem)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Models\GradingSystem  $gradingSystem
-     * @return \Illuminate\Http\Response
-     */
-    public function update(Request $request, GradingSystem $gradingSystem)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  \App\Models\GradingSystem  $gradingSystem
-     * @return \Illuminate\Http\Response
-     */
-    public function destroy(GradingSystem $gradingSystem)
-    {
-        //
-    }
 }
