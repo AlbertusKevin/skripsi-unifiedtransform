@@ -11,6 +11,7 @@ use App\Interfaces\SchoolSessionInterface;
 use App\Interfaces\AcademicSettingInterface;
 use App\Http\Requests\AttendanceStoreRequest;
 use App\Interfaces\SectionInterface;
+use App\Mediator\MediatorRepository;
 use App\Repositories\AttendanceRepository;
 use App\Repositories\CourseRepository;
 use App\Traits\SchoolSession;
@@ -33,6 +34,7 @@ class AttendanceController extends Controller
     ) {
         $this->middleware(['can:view attendances']);
 
+        $this->mediator = new MediatorRepository();
         $this->userRepository = $userRepository;
         $this->academicSettingRepository = $academicSettingRepository;
         $this->schoolSessionRepository = $schoolSessionRepository;
@@ -150,6 +152,7 @@ class AttendanceController extends Controller
         $attendanceRepository = new AttendanceRepository();
 
         try {
+            //todo: ssss
             $academic_setting = $this->academicSettingRepository->getAcademicSetting();
             if($academic_setting->attendance_type == 'section') {
                 $attendances = $attendanceRepository->getSectionAttendance($class_id, $section_id, $current_school_session_id);
