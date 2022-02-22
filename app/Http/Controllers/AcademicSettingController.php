@@ -13,6 +13,7 @@ use App\Interfaces\SchoolClassInterface;
 use App\Interfaces\SchoolSessionInterface;
 use App\Interfaces\AcademicSettingInterface;
 use App\Http\Requests\AttendanceTypeUpdateRequest;
+use App\Mediator\MediatorRepository;
 
 class AcademicSettingController extends Controller
 {
@@ -35,7 +36,7 @@ class AcademicSettingController extends Controller
         SemesterInterface $semesterRepository
     ) {
         $this->middleware(['can:view academic settings']);
-
+        $this->mediator = new MediatorRepository();
         $this->academicSettingRepository = $academicSettingRepository;
         $this->schoolSessionRepository = $schoolSessionRepository;
         $this->schoolClassRepository = $schoolClassRepository;
@@ -53,26 +54,15 @@ class AcademicSettingController extends Controller
     public function index()
     {
         $current_school_session_id = $this->getSchoolCurrentSession();
+        $data = $this->mediator->notify($this,"dashboard",["current_school_session_id" => $current_school_session_id]);
+
         $latest_school_session = $this->schoolSessionRepository->getLatestSession();
         $academic_setting = $this->academicSettingRepository->getAcademicSetting();
-        $school_sessions = $this->schoolSessionRepository->getAll();
-        $school_classes = $this->schoolClassRepository->getAllBySession($current_school_session_id);
-        $school_sections = $this->schoolSectionRepository->getAllBySession($current_school_session_id);
-        $teachers = $this->userRepository->getAllTeachers();
-        $courses = $this->courseRepository->getAll($current_school_session_id);
-        $semesters = $this->semesterRepository->getAll($current_school_session_id);
-
-        $data = [
-            'current_school_session_id' => $current_school_session_id,
+        
+        $data = array_merge($data, [
             'latest_school_session_id'  => $latest_school_session->id,
             'academic_setting'          => $academic_setting,
-            'school_sessions'           => $school_sessions,
-            'school_classes'            => $school_classes,
-            'school_sections'           => $school_sections,
-            'teachers'                  => $teachers,
-            'courses'                   => $courses,
-            'semesters'                 => $semesters,
-        ];
+        ]);
 
         return view('academics.settings', $data);
     }
