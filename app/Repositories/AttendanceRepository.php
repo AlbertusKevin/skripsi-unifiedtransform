@@ -2,9 +2,9 @@
 
 namespace App\Repositories;
 
-use Carbon\Carbon;
 use App\Models\Attendance;
 use App\Interfaces\AttendanceInterface;
+use App\Facade\TimeManipulationFacade;
 
 class AttendanceRepository implements AttendanceInterface {
     public function saveAttendance($request) {
@@ -18,7 +18,7 @@ class AttendanceRepository implements AttendanceInterface {
 
     public function prepareInput($request) {
         $input = [];
-        $now = Carbon::now()->toDateTimeString();
+        $now = TimeManipulationFacade::convertDateToString(TimeManipulationFacade::getTimeNow());
         for($i=0; $i < sizeof($request['student_ids']); $i++) {
             $student_id = $request['student_ids'][$i];
             $input[] = array(
@@ -41,7 +41,7 @@ class AttendanceRepository implements AttendanceInterface {
                             ->where('class_id', $class_id)
                             ->where('section_id', $section_id)
                             ->where('session_id', $session_id)
-                            ->whereDate('created_at', '=', Carbon::today())
+                            ->whereDate('created_at', '=', TimeManipulationFacade::getToday())
                             ->get();
         } catch (\Exception $e) {
             throw new \Exception('Failed to get attendances. '.$e->getMessage());
@@ -54,7 +54,7 @@ class AttendanceRepository implements AttendanceInterface {
                             ->where('class_id', $class_id)
                             ->where('course_id', $course_id)
                             ->where('session_id', $session_id)
-                            ->whereDate('created_at', '=', Carbon::today())
+                            ->whereDate('created_at', '=', TimeManipulationFacade::getToday())
                             ->get();
         } catch (\Exception $e) {
             throw new \Exception('Failed to get attendances. '.$e->getMessage());
