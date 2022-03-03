@@ -6,6 +6,8 @@ use App\Models\Exam;
 use App\Models\Mark;
 use App\Models\FinalMark;
 use App\Interfaces\MarkInterface;
+use App\Builder;
+use App\Builder\MarkRepositoryBuilder;
 
 class MarkRepository implements MarkInterface {
     public function create($rows) {
@@ -37,6 +39,17 @@ class MarkRepository implements MarkInterface {
 
     public function getAllByStudentId($session_id, $semester_id, $class_id, $section_id, $course_id, $student_id) {
         $exam_ids = Exam::where('semester_id', $semester_id)->pluck('id')->toArray();
+        $finalMark = new FinalMark();
+        $builder = new MarkRepositoryBuilder($finalMark::with('student'));
+        // dd($session_id, $semester_id, $class_id, $section_id, $course_id, $student_id);
+        // dd($builder->examIdFilter($session_id)->get());
+        dd($builder->sessionIdFilter($session_id)->classIdFilter($class_id)->build());
+        
+        // where('session_id', $session_id)
+        // ->where('semester_id', $semester_id)
+        // ->where('class_id', $class_id)
+        // ->where('section_id', $section_id)
+        // ->where('course_id', $course_id)->get());
         return Mark::with('student','exam')->where('session_id', $session_id)
                     ->whereIn('exam_id', $exam_ids)
                     ->where('student_id', $student_id)
