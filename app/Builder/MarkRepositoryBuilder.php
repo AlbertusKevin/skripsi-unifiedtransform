@@ -1,11 +1,6 @@
 <?php 
 namespace App\Builder;
 
-use App\Models\Exam;
-use App\Models\Mark;
-use App\Models\FinalMark;
-use App\Interfaces\MarkInterface;
-
 class MarkRepositoryBuilder{
     private $model;
     private $construction;

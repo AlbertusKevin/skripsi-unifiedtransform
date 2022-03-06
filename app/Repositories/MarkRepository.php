@@ -10,6 +10,9 @@ use App\Builder;
 use App\Builder\MarkRepositoryBuilder;
 
 class MarkRepository implements MarkInterface {
+    private $finalMarkModel;
+    private $markModel;
+
     public function create($rows) {
         try {
             foreach($rows as $row){
