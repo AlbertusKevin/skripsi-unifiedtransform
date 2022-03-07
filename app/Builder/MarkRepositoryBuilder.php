@@ -3,11 +3,15 @@ namespace App\Builder;
 
 class MarkRepositoryBuilder{
     private $model;
-    private $construction;
 
     public function __construct($model)
     {
         $this->model = $model;
+    }
+
+    public function withPivotData(array $pivot_data){
+        $this->model = $this->model->with($pivot_data);
+        return $this;
     }
 
     public function sessionIdFilter($session_id){
@@ -15,7 +19,7 @@ class MarkRepositoryBuilder{
         return $this;
     }
 
-    public function semseterIdFilter($semester_id){
+    public function semesterIdFilter($semester_id){
         $this->model = $this->model->where('semester_id', $semester_id);
         return $this;
     }
@@ -35,7 +39,17 @@ class MarkRepositoryBuilder{
         return $this;
     }
 
-    public function build(){
+    public function studentIdFilter($student_id){
+        $this->model = $this->model->where('student_id', $student_id);
+        return $this;
+    }
+
+    public function examIdsFilter($exam_ids){
+        $this->model = $this->model->whereIn('exam_id', $exam_ids);
+        return $this;
+    }
+
+    public function buildGet(){
         return $this->model->get();
     }
 }

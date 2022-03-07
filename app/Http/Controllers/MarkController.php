@@ -23,6 +23,7 @@ class MarkController extends Controller
 {
     use SchoolSession, AssignedTeacherCheck;
 
+    protected array $type;
     protected $academicSettingRepository;
     protected $userRepository;
     protected $schoolClassRepository;
@@ -47,6 +48,10 @@ class MarkController extends Controller
         $this->schoolSectionRepository = $schoolSectionRepository;
         $this->courseRepository = $courseRepository;
         $this->semesterRepository = $semesterRepository;
+        $this->type = [
+            "MARK" => "MARK",
+            "FINAL_MARK" => "FINAL_MARK"
+        ];
     }
     /**
      * Display a listing of the resource.
@@ -65,7 +70,9 @@ class MarkController extends Controller
         $semesters = $this->semesterRepository->getAll($current_school_session_id);
         $school_classes = $this->schoolClassRepository->getAllBySession($current_school_session_id);
         $markRepository = new MarkRepository();
-        $marks = $markRepository->getAllFinalMarks($current_school_session_id, $semester_id, $class_id, $section_id, $course_id);
+        // $marks = $markRepository->getAllFinalMarks($current_school_session_id, $semester_id, $class_id, $section_id, $course_id);
+        $data = [];
+        $marks = $markRepository->getMarks($data, $this->type["FINAL_MARK"]);
 
         if(!$marks) {
             return abort(404);
@@ -125,11 +132,16 @@ class MarkController extends Controller
             $examRepository = new ExamRepository();
             $exams = $examRepository->getAll($current_school_session_id, $semester_id, $class_id);
             $markRepository = new MarkRepository();
-            $studentsWithMarks = $markRepository->getAll($current_school_session_id, $semester_id, $class_id, $section_id, $course_id);
+            
+            // $studentsWithMarks = $markRepository->getAll($current_school_session_id, $semester_id, $class_id, $section_id, $course_id);
+            $data = [];
+            $studentsWithMarks = $markRepository->getMarks($data, $this->type["MARK"]);
             $studentsWithMarks = $studentsWithMarks->groupBy('student_id');
+
             $sectionStudents = $this->userRepository->getAllStudents($current_school_session_id, $class_id, $section_id);
             $final_marks_submitted = false;
-            $final_marks_submit_count = $markRepository->getFinalMarksCount($current_school_session_id, $semester_id, $class_id, $section_id, $course_id);
+            // $final_marks_submit_count = $markRepository->getFinalMarksCount($current_school_session_id, $semester_id, $class_id, $section_id, $course_id);
+            $final_marks_submit_count = $markRepository->getMarks($data, $this->type["FINAL_MARK"]);
 
             if($final_marks_submit_count > 0) {
                 $final_marks_submitted = true;
@@ -169,7 +181,10 @@ class MarkController extends Controller
 
         $current_school_session_id = $this->getSchoolCurrentSession();
         $markRepository = new MarkRepository();
-        $studentsWithMarks = $markRepository->getAll($current_school_session_id, $semester_id, $class_id, $section_id, $course_id);
+        // $studentsWithMarks = $markRepository->getAll($current_school_session_id, $semester_id, $class_id, $section_id, $course_id);
+
+        $filter = [];
+        $studentsWithMarks = $markRepository->getMarks($filter, $this->type["MARK"]);
         $studentsWithMarks = $studentsWithMarks->groupBy('student_id');
 
         $data = [
@@ -271,9 +286,20 @@ class MarkController extends Controller
         $course_id = $request->query('course_id');
         $course_name = $request->query('course_name');
         $student_id = $request->query('student_id');
+
+        $data = [
+            "session_id" => $session_id,
+            "semester_id" => $semester_id,
+            "class_id" => $class_id,
+            "section_id" => $section_id,
+            "course_id" => $course_id,
+            "course_name" => $course_name,
+            "student_id" => $student_id
+        ];
+
         $markRepository = new MarkRepository();
-        $marks = $markRepository->getAllByStudentId($session_id, $semester_id, $class_id, $section_id, $course_id, $student_id);
-        $finalMarks = $markRepository->getAllFinalMarksByStudentId($session_id, $student_id, $semester_id, $class_id, $section_id, $course_id);
+        $marks = $markRepository->getMarks($data, $this->type["MARK"]);
+        $finalMarks = $markRepository->getMarks($data, $this->type["FINAL_MARK"]);
 
         if(!$finalMarks) {
             return abort(404);
