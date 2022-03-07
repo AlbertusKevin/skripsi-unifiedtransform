@@ -71,9 +71,15 @@ class MarkController extends Controller
         $school_classes = $this->schoolClassRepository->getAllBySession($current_school_session_id);
         $markRepository = new MarkRepository();
         // $marks = $markRepository->getAllFinalMarks($current_school_session_id, $semester_id, $class_id, $section_id, $course_id);
-        $data = [];
+        $filter = [
+            "session_id" => $current_school_session_id,
+            "semester_id" => $semester_id,
+            "class_id" => $class_id,
+            "section_id" => $section_id,
+            "course_id" => $course_id
+        ];
         $pivotData = ["student"];
-        $marks = $markRepository->getMarks($data, $this->type["FINAL_MARK"], $pivotData);
+        $marks = $markRepository->getMarks($filter, $this->type["FINAL_MARK"], $pivotData);
 
         if(!$marks) {
             return abort(404);
@@ -135,11 +141,17 @@ class MarkController extends Controller
             $markRepository = new MarkRepository();
             
             // $studentsWithMarks = $markRepository->getAll($current_school_session_id, $semester_id, $class_id, $section_id, $course_id);
-            $data = [
+            $filter = [
                 "exam_id" => true,
+                "session_id" => $current_school_session_id,
+                "semester_id" => $semester_id,
+                "class_id" => $class_id,
+                "section_id" => $section_id,
+                "course_id" => $course_id
             ];
+
             $pivotData = ['student','exam'];
-            $studentsWithMarks = $markRepository->getMarks($data, $this->type["MARK"], $pivotData);
+            $studentsWithMarks = $markRepository->getMarks($filter, $this->type["MARK"], $pivotData);
             $studentsWithMarks = $studentsWithMarks->groupBy('student_id');
 
             $sectionStudents = $this->userRepository->getAllStudents($current_school_session_id, $class_id, $section_id);
@@ -189,7 +201,13 @@ class MarkController extends Controller
 
         $filter = [
             "exam_id" => true,
+            "session_id" => $current_school_session_id,
+            "semester_id" => $semester_id,
+            "class_id" => $class_id,
+            "section_id" => $section_id,
+            "course_id" => $course_id
         ];
+
         $pivotData = ['student','exam'];
 
         $studentsWithMarks = $markRepository->getMarks($filter, $this->type["MARK"], $pivotData);
@@ -305,7 +323,6 @@ class MarkController extends Controller
             "class_id" => $class_id,
             "section_id" => $section_id,
             "course_id" => $course_id,
-            "course_name" => $course_name,
             "student_id" => $student_id
         ];
         $pivotData = ['student','exam'];
