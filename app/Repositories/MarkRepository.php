@@ -33,18 +33,18 @@ class MarkRepository implements MarkInterface {
 
         // buat objek buildernya
         $builder = new MarkRepositoryBuilder($model);
-
         // tambahkan jika butuh pivot data
         if(count($with) != 0) $builder = $builder->withPivotData($with);
-
+        
         //query berdasarkan filter yang ada
         if(array_key_exists("exam_id",$data)){ 
             $exam_ids = Exam::where('semester_id', $data["semester_id"])->pluck('id')->toArray();
             $builder = $builder->examIdsFilter($exam_ids);
         }
-
+        
+        // dd(array_key_exists("semester_id",$data) && $model == Mark::class);
         if(array_key_exists("session_id",$data)) $builder = $builder->sessionIdFilter($data["session_id"]);
-        if(array_key_exists("semester_id",$data)) $builder = $builder->semesterIdFilter($data["semester_id"]);
+        if(array_key_exists("semester_id",$data) && $model != new Mark()) $builder = $builder->semesterIdFilter($data["semester_id"]);
         if(array_key_exists("class_id",$data)) $builder = $builder->classIdFilter($data["class_id"]);
         if(array_key_exists("section_id",$data)) $builder = $builder->sectionIdFilter($data["section_id"]);
         if(array_key_exists("course_id",$data)) $builder = $builder->courseIdFilter($data["course_id"]);

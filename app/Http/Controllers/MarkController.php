@@ -305,6 +305,7 @@ class MarkController extends Controller
      */
     public function showCourseMark(Request $request)
     {
+        
         $session_id = $request->query('session_id');
         $semester_id = $request->query('semester_id');
         $class_id = $request->query('class_id');
@@ -327,7 +328,7 @@ class MarkController extends Controller
         ];
         $pivotData = ['student','exam'];
         $marks = $markRepository->getMarks($filter, $this->type["MARK"], $pivotData);
-        
+
         unset($filter["exam_id"]);
         $pivotData = ['student'];
         $finalMarks = $markRepository->getMarks($filter, $this->type["FINAL_MARK"], $pivotData);
@@ -339,17 +340,18 @@ class MarkController extends Controller
         $gradingSystemRepository = new GradingSystemRepository();
         $gradingSystem = $gradingSystemRepository->getGradingSystem($session_id, $semester_id, $class_id);
 
+        
         if(!$gradingSystem) {
             return abort(404);
         }
-
+        
         $gradeRulesRepository = new GradeRuleRepository();
         $gradingSystemRules = $gradeRulesRepository->getAll($session_id, $gradingSystem->id);
-
+        
         if(!$gradingSystemRules) {
             return abort(404);
         }
-
+        
         foreach($finalMarks as $mark_key => $mark) {
             foreach ($gradingSystemRules as $key => $gradingSystemRule) {
                 if($mark->final_marks >= $gradingSystemRule->start_at && $mark->final_marks <= $gradingSystemRule->end_at) {
@@ -359,6 +361,7 @@ class MarkController extends Controller
             }
         }
 
+        // dd("oy");
         $data = [
             'marks' => $marks,
             'final_marks'   => $finalMarks,
