@@ -9,25 +9,28 @@ use App\Repositories\NoticeRepository;
 use App\Interfaces\SchoolClassInterface;
 use App\Interfaces\SchoolSessionInterface;
 use App\Repositories\PromotionRepository;
+use App\Strategy\ContextUserRepository;
+use App\Traits\StrategyContext;
 
 class HomeController extends Controller
 {
-    use SchoolSession;
+    use SchoolSession, StrategyContext;
     protected $schoolSessionRepository;
     protected $schoolClassRepository;
     protected $userRepository;
+    private ContextUserRepository $context;
     /**
      * Create a new controller instance.
      *
      * @return void
      */
     public function __construct(
-        UserInterface $userRepository, SchoolSessionInterface $schoolSessionRepository, SchoolClassInterface $schoolClassRepository)
+        SchoolSessionInterface $schoolSessionRepository, SchoolClassInterface $schoolClassRepository)
     {
         // $this->middleware('auth');
-        $this->userRepository = $userRepository;
         $this->schoolSessionRepository = $schoolSessionRepository;
         $this->schoolClassRepository = $schoolClassRepository;
+        $this->context = new ContextUserRepository();
     }
 
     /**
@@ -39,10 +42,21 @@ class HomeController extends Controller
     {
         $current_school_session_id = $this->getSchoolCurrentSession();
         $classCount = $this->schoolClassRepository->getAllBySession($current_school_session_id)->count();
-        $studentCount = $this->userRepository->getAllStudentsBySessionCount($current_school_session_id);
+
+        $data = [
+            "session_id" => $current_school_session_id,
+            "by_session_count" => true
+        ];
+        
+        $this->setStrategyContext(STUDENT);
+        $studentCount = $this->context->executeGetAll($data);
+        
         $promotionRepository = new PromotionRepository();
         $maleStudentsBySession = $promotionRepository->getMaleStudentsBySessionCount($current_school_session_id);
-        $teacherCount = $this->userRepository->getAllTeachers()->count();
+        
+        $this->setStrategyContext(TEACHER);
+        $teacherCount = $this->context->executeGetAll()->count();
+
         $noticeRepository = new NoticeRepository();
         $notices = $noticeRepository->getAll($current_school_session_id);
 

@@ -1,5 +1,8 @@
 <?php 
-namespace App\UserRepoStrategy;
+namespace App\Strategy;
+
+define("TEACHER", 'TEACHER');
+define("STUDENT", 'STUDENT');
 
 class ContextUserRepository{
     private UserRepoStrategy $strategy;
@@ -17,6 +20,14 @@ class ContextUserRepository{
     }
 
     public function executeFind($id){
-        $this->strategy->find($id);
+        return $this->strategy->find($id);
+    }
+
+    public function executeGetAll($data = []){
+        return $this->strategy->getAll($data);
+    }
+
+    public function executeChangePassword($new_password){
+        $this->strategy->changePassword($new_password);
     }
 }

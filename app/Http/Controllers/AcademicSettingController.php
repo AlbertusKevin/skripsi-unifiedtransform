@@ -13,34 +13,35 @@ use App\Interfaces\SchoolClassInterface;
 use App\Interfaces\SchoolSessionInterface;
 use App\Interfaces\AcademicSettingInterface;
 use App\Http\Requests\AttendanceTypeUpdateRequest;
+use App\Traits\StrategyContext;
+use App\Strategy\ContextUserRepository;
 
 class AcademicSettingController extends Controller
 {
-    use SchoolSession;
+    use SchoolSession, StrategyContext;
     protected $academicSettingRepository;
     protected $schoolSessionRepository;
     protected $schoolClassRepository;
     protected $schoolSectionRepository;
-    protected $userRepository;
     protected $courseRepository;
     protected $semesterRepository;
+    private ContextUserRepository $context;
 
     public function __construct(
         AcademicSettingInterface $academicSettingRepository,
         SchoolSessionInterface $schoolSessionRepository,
         SchoolClassInterface $schoolClassRepository,
         SectionInterface $schoolSectionRepository,
-        UserInterface $userRepository,
         CourseInterface $courseRepository,
         SemesterInterface $semesterRepository
     ) {
         $this->middleware(['can:view academic settings']);
 
+        $this->context = new ContextUserRepository();
         $this->academicSettingRepository = $academicSettingRepository;
         $this->schoolSessionRepository = $schoolSessionRepository;
         $this->schoolClassRepository = $schoolClassRepository;
         $this->schoolSectionRepository = $schoolSectionRepository;
-        $this->userRepository = $userRepository;
         $this->courseRepository = $courseRepository;
         $this->semesterRepository = $semesterRepository;
     }
@@ -58,9 +59,11 @@ class AcademicSettingController extends Controller
         $school_sessions = $this->schoolSessionRepository->getAll();
         $school_classes = $this->schoolClassRepository->getAllBySession($current_school_session_id);
         $school_sections = $this->schoolSectionRepository->getAllBySession($current_school_session_id);
-        $teachers = $this->userRepository->getAllTeachers();
         $courses = $this->courseRepository->getAll($current_school_session_id);
         $semesters = $this->semesterRepository->getAll($current_school_session_id);
+
+        $this->setStrategyContext(TEACHER);
+        $teachers = $this->context->executeGetAll();
 
         $data = [
             'current_school_session_id' => $current_school_session_id,

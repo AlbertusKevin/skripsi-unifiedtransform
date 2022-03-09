@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Traits\SchoolSession;
-use App\Interfaces\UserInterface;
+use App\Traits\StrategyContext;
 use App\Interfaces\SectionInterface;
 use App\Interfaces\SchoolClassInterface;
 use App\Repositories\PromotionRepository;
@@ -13,49 +13,29 @@ use App\Http\Requests\StudentStoreRequest;
 use App\Http\Requests\TeacherStoreRequest;
 use App\Interfaces\SchoolSessionInterface;
 use App\Repositories\StudentParentInfoRepository;
-use App\Strategy\ConcreteStrategy\StudentStrategy;
-use App\Strategy\ConcreteStrategy\TeacherStrategy;
-use App\UserRepoStrategy\ContextUserRepository;
-use App\UserRepoStrategy\UserRepoStrategy;
-
-define("TEACHER", 'TEACHER');
-define("STUDENT", 'STUDENT');
+use App\Strategy\ContextUserRepository;
 
 class UserController extends Controller
 {
-    use SchoolSession;
+    use SchoolSession, StrategyContext;
     
-    protected $userRepository;
     protected $schoolSessionRepository;
     protected $schoolClassRepository;
     protected $schoolSectionRepository;
     private ContextUserRepository $context;
 
-    public function __construct(UserInterface $userRepository, SchoolSessionInterface $schoolSessionRepository,
-    SchoolClassInterface $schoolClassRepository,
-    SectionInterface $schoolSectionRepository)
+    public function __construct(
+        SchoolSessionInterface $schoolSessionRepository,
+        SchoolClassInterface $schoolClassRepository,
+        SectionInterface $schoolSectionRepository)
     {
         $this->middleware(['can:view users']);
         $this->context = new ContextUserRepository();
-
-        $this->userRepository = $userRepository;
         $this->schoolSessionRepository = $schoolSessionRepository;
         $this->schoolClassRepository = $schoolClassRepository;
         $this->schoolSectionRepository = $schoolSectionRepository;
     }
     
-    private function setStrategyContext($user){
-        switch ($user) {
-            case TEACHER:
-                $this->context->setStrategy(new TeacherStrategy());
-                break;
-                
-            default:
-                $this->context->setStrategy(new StudentStrategy());
-                break;
-        }
-    }
-
     /**
      * Store a newly created resource in storage.
      *
@@ -74,13 +54,20 @@ class UserController extends Controller
     }
 
     public function getStudentList(Request $request) {
+        $this->setStrategyContext(STUDENT);
         $current_school_session_id = $this->getSchoolCurrentSession();
         $class_id = $request->query('class_id', 0);
         $section_id = $request->query('section_id', 0);
 
+        $data = [
+            "session_id" => $current_school_session_id, 
+            "class_id" => $class_id, 
+            "section_id" => $section_id, 
+        ];
+
         try{
             $school_classes = $this->schoolClassRepository->getAllBySession($current_school_session_id);
-            $studentList = $this->userRepository->getAllStudents($current_school_session_id, $class_id, $section_id);
+            $studentList = $this->context->executeGetAll($data);
 
             $data = [
                 'studentList'       => $studentList,
@@ -178,7 +165,8 @@ class UserController extends Controller
     }
 
     public function editTeacher($teacher_id) {
-        $teacher = $this->userRepository->findTeacher($teacher_id);
+        $this->setStrategyContext(TEACHER);
+        $teacher = $this->context->executeFind($teacher_id);
 
         $data = [
             'teacher'   => $teacher,
@@ -198,7 +186,8 @@ class UserController extends Controller
     }
 
     public function getTeacherList(){
-        $teachers = $this->userRepository->getAllTeachers();
+        $this->setStrategyContext(TEACHER);
+        $teachers = $this->context->executeGetAll();
 
         $data = [
             'teachers' => $teachers,

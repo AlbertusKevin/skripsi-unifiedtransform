@@ -45,15 +45,9 @@ class UserRepository implements UserInterface {
         }
     }
 
-    public function getAllStudentsBySession($session_id) {
-        $promotionRepository = new PromotionRepository();
-        return $promotionRepository->getAllStudentsBySession($session_id);
-    }
+    public function getAllStudentsBySession($session_id) {}
 
-    public function getAllStudentsBySessionCount($session_id) {
-        $promotionRepository = new PromotionRepository();
-        return $promotionRepository->getAllStudentsBySessionCount($session_id);
-    }
+    public function getAllStudentsBySessionCount($session_id) {}
 
     public function getAllTeachers() {
         try {

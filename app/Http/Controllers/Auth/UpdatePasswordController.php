@@ -6,14 +6,17 @@ use App\Interfaces\UserInterface;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Hash;
 use App\Http\Requests\PasswordChangeRequest;
+use App\Strategy\ContextUserRepository;
+use App\Traits\StrategyContext;
 
 class UpdatePasswordController extends Controller
 {
-    protected $userRepository;
+    use StrategyContext;
+    private ContextUserRepository $context;
 
-    public function __construct(UserInterface $userRepository)
+    public function __construct()
     {
-        $this->userRepository = $userRepository;
+        $this->context = new ContextUserRepository();
     }
 
     public function edit() {
@@ -25,7 +28,7 @@ class UpdatePasswordController extends Controller
         if (Hash::check($request['old_password'], auth()->user()->password)) {
             // The passwords match...
             try{
-                $this->userRepository->changePassword($request['new_password']);
+                $this->context->executeChangePassword($request['new_password']);
 
                 return back()->with('status', 'Changing password was successful!');
             } catch (\Exception $e) {

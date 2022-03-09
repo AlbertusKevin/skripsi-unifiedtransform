@@ -14,26 +14,26 @@ use App\Interfaces\SectionInterface;
 use App\Repositories\AttendanceRepository;
 use App\Repositories\CourseRepository;
 use App\Traits\SchoolSession;
+use App\Traits\StrategyContext;
+use App\Strategy\ContextUserRepository;
 
 class AttendanceController extends Controller
 {
-    use SchoolSession;
+    use SchoolSession, StrategyContext;
     protected $academicSettingRepository;
     protected $schoolSessionRepository;
     protected $schoolClassRepository;
     protected $sectionRepository;
-    protected $userRepository;
+    private ContextUserRepository $context;
 
     public function __construct(
-        UserInterface $userRepository,
         AcademicSettingInterface $academicSettingRepository,
         SchoolSessionInterface $schoolSessionRepository,
         SchoolClassInterface $schoolClassRepository,
         SectionInterface $sectionRepository
     ) {
         $this->middleware(['can:view attendances']);
-
-        $this->userRepository = $userRepository;
+        $this->context = new ContextUserRepository();
         $this->academicSettingRepository = $academicSettingRepository;
         $this->schoolSessionRepository = $schoolSessionRepository;
         $this->schoolClassRepository = $schoolClassRepository;
@@ -83,7 +83,14 @@ class AttendanceController extends Controller
             $section_id = $request->query('section_id', 0);
             $course_id = $request->query('course_id');
 
-            $student_list = $this->userRepository->getAllStudents($current_school_session_id, $class_id, $section_id);
+            $data = [
+                "session_id" => $current_school_session_id, 
+                "class_id" => $class_id, 
+                "section_id" => $section_id, 
+            ];
+
+            $this->setStrategyContext(STUDENT);
+            $student_list = $this->context->executeGetAll($data);
 
             $school_class = $this->schoolClassRepository->findById($class_id);
             $school_section = $this->sectionRepository->findById($section_id);
@@ -172,7 +179,9 @@ class AttendanceController extends Controller
 
         $attendanceRepository = new AttendanceRepository();
         $attendances = $attendanceRepository->getStudentAttendance($current_school_session_id, $id);
-        $student = $this->userRepository->findStudent($id);
+
+        $this->setStrategyContext(STUDENT);
+        $student = $this->context->executeFind($id);
 
         $data = [
             'attendances'   => $attendances,
