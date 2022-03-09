@@ -13,20 +13,30 @@ use App\Http\Requests\StudentStoreRequest;
 use App\Http\Requests\TeacherStoreRequest;
 use App\Interfaces\SchoolSessionInterface;
 use App\Repositories\StudentParentInfoRepository;
+use App\Strategy\ConcreteStrategy\StudentStrategy;
+use App\Strategy\ConcreteStrategy\TeacherStrategy;
+use App\UserRepoStrategy\ContextUserRepository;
+use App\UserRepoStrategy\UserRepoStrategy;
+
+define("TEACHER", 'TEACHER');
+define("STUDENT", 'STUDENT');
 
 class UserController extends Controller
 {
     use SchoolSession;
+    
     protected $userRepository;
     protected $schoolSessionRepository;
     protected $schoolClassRepository;
     protected $schoolSectionRepository;
+    private ContextUserRepository $context;
 
     public function __construct(UserInterface $userRepository, SchoolSessionInterface $schoolSessionRepository,
     SchoolClassInterface $schoolClassRepository,
     SectionInterface $schoolSectionRepository)
     {
         $this->middleware(['can:view users']);
+        $this->context = new ContextUserRepository();
 
         $this->userRepository = $userRepository;
         $this->schoolSessionRepository = $schoolSessionRepository;
@@ -34,6 +44,18 @@ class UserController extends Controller
         $this->schoolSectionRepository = $schoolSectionRepository;
     }
     
+    private function setStrategyContext($user){
+        switch ($user) {
+            case TEACHER:
+                $this->context->setStrategy(new TeacherStrategy());
+                break;
+                
+            default:
+                $this->context->setStrategy(new StudentStrategy());
+                break;
+        }
+    }
+
     /**
      * Store a newly created resource in storage.
      *
@@ -42,9 +64,9 @@ class UserController extends Controller
      */
     public function storeTeacher(TeacherStoreRequest $request)
     {
+        $this->setStrategyContext(TEACHER);
         try {
-            $this->userRepository->createTeacher($request->validated());
-
+            $this->context->executeCreate($request->validated());
             return back()->with('status', 'Teacher creation was successful!');
         } catch (\Exception $e) {
             return back()->withError($e->getMessage());
@@ -73,7 +95,8 @@ class UserController extends Controller
 
 
     public function showStudentProfile($id) {
-        $student = $this->userRepository->findStudent($id);
+        $this->setStrategyContext(STUDENT);
+        $student = $this->context->executeFind($id);
         $current_school_session_id = $this->getSchoolCurrentSession();
         $promotionRepository = new PromotionRepository();
         $promotion_info = $promotionRepository->getPromotionInfoById($current_school_session_id, $id);
@@ -87,7 +110,8 @@ class UserController extends Controller
     }
 
     public function showTeacherProfile($id) {
-        $teacher = $this->userRepository->findTeacher($id);
+        $this->setStrategyContext(TEACHER);
+        $teacher = $this->context->executeFind($id);
         $data = [
             'teacher'   => $teacher,
         ];
@@ -115,8 +139,9 @@ class UserController extends Controller
      */
     public function storeStudent(StudentStoreRequest $request)
     {
+        $this->setStrategyContext(STUDENT);
         try {
-            $this->userRepository->createStudent($request->validated());
+            $this->context->executeCreate($request->validated());
             return back()->with('status', 'Student creation was successful!');
         } catch (\Exception $e) {
             return back()->withError($e->getMessage());
@@ -124,7 +149,9 @@ class UserController extends Controller
     }
 
     public function editStudent($student_id) {
-        $student = $this->userRepository->findStudent($student_id);
+        $this->setStrategyContext(STUDENT);
+
+        $student = $this->context->executeFind($student_id);
         $studentParentInfoRepository = new StudentParentInfoRepository();
         $parent_info = $studentParentInfoRepository->getParentInfo($student_id);
         $promotionRepository = new PromotionRepository();
@@ -141,8 +168,9 @@ class UserController extends Controller
     }
 
     public function updateStudent(Request $request) {
+        $this->setStrategyContext(STUDENT);
         try {
-            $this->userRepository->updateStudent($request->toArray());
+            $this->context->executeUpdate($request->toArray());
             return back()->with('status', 'Student update was successful!');
         } catch (\Exception $e) {
             return back()->withError($e->getMessage());
@@ -160,8 +188,9 @@ class UserController extends Controller
     }
 
     public function updateTeacher(Request $request) {
+        $this->setStrategyContext(TEACHER);
         try {
-            $this->userRepository->updateTeacher($request->toArray());
+            $this->context->executeUpdate($request->toArray());
             return back()->with('status', 'Teacher update was successful!');
         } catch (\Exception $e) {
             return back()->withError($e->getMessage());
