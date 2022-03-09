@@ -53,17 +53,8 @@ class AcademicSettingController extends Controller
      */
     public function index()
     {
-        $current_school_session_id = $this->getSchoolCurrentSession();
-        $data = $this->mediator->notify($this,"dashboard",["current_school_session_id" => $current_school_session_id]);
-
-        $latest_school_session = $this->schoolSessionRepository->getLatestSession();
-        $academic_setting = $this->academicSettingRepository->getAcademicSetting();
-        
-        $data = array_merge($data, [
-            'latest_school_session_id'  => $latest_school_session->id,
-            'academic_setting'          => $academic_setting,
-        ]);
-
+        $param = ["school_session_id" => $this->getSchoolCurrentSession()];
+        $data = $this->mediator->getData($this,"index",$param);
         return view('academics.settings', $data);
     }
 
@@ -77,7 +68,6 @@ class AcademicSettingController extends Controller
     {
         try {
             $this->academicSettingRepository->updateAttendanceType($request->validated());
-
             return back()->with('status', 'Attendance type update was successful!');
         } catch (\Exception $e) {
             return back()->withError($e->getMessage());
@@ -87,7 +77,6 @@ class AcademicSettingController extends Controller
     public function updateFinalMarksSubmissionStatus(Request $request) {
         try {
             $this->academicSettingRepository->updateFinalMarksSubmissionStatus($request);
-
             return back()->with('status', 'Final marks submission status update was successful!');
         } catch (\Exception $e) {
             return back()->withError($e->getMessage());

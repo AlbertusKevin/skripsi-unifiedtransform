@@ -36,16 +36,18 @@ class MediatorRepository implements Mediator{
         $this->semesterRepository = new SemesterRepository();
     }
 
-    public function notify($object, $event, $data = []){
-        if($event == "dashboard"){
+    public function getData($object, $event, $data = []){
+        if($event == "index"){
             return [
-                'current_school_session_id' => $data["current_school_session_id"],
+                'current_school_session_id' => $data["school_session_id"],
                 'school_sessions'           => $this->schoolSessionRepository->getAll(),
-                'school_classes'            => $this->schoolClassRepository->getAllBySession($data["current_school_session_id"]),
-                'school_sections'           => $this->schoolSectionRepository->getAllBySession($data["current_school_session_id"]),
+                'school_classes'            => $this->schoolClassRepository->getAllBySession($data["school_session_id"]),
+                'school_sections'           => $this->schoolSectionRepository->getAllBySession($data["school_session_id"]),
                 'teachers'                  => $this->userRepository->getAllTeachers(),
-                'courses'                   => $this->courseRepository->getAll($data["current_school_session_id"]),
-                'semesters'                 => $this->semesterRepository->getAll($data["current_school_session_id"]),
+                'courses'                   => $this->courseRepository->getAll($data["school_session_id"]),
+                'semesters'                 => $this->semesterRepository->getAll($data["school_session_id"]),
+                "latest_school_session_id"  => $this->schoolSessionRepository->getLatestSession(),
+                "academic_setting"          => $this->academicSettingRepository->getAcademicSetting()
             ];
         }
     }
