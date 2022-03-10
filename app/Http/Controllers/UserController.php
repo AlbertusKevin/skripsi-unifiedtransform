@@ -105,7 +105,6 @@ class UserController extends Controller
         return view('teachers.profile', $data);
     }
 
-
     public function createStudent() {
         $current_school_session_id = $this->getSchoolCurrentSession();
         $school_classes = $this->schoolClassRepository->getAllBySession($current_school_session_id);

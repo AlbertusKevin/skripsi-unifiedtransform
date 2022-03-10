@@ -15,35 +15,20 @@ use Illuminate\Support\Facades\Hash;
 class StudentStrategy extends UserRepoStrategy{
     use Base64ToFile;
 
-    private function getData($request){
-        return [
-            'first_name'    => $request['first_name'],
-            'last_name'     => $request['last_name'],
-            'email'         => $request['email'],
-            'gender'        => $request['gender'],
-            'nationality'   => $request['nationality'],
-            'phone'         => $request['phone'],
-            'address'       => $request['address'],
-            'address2'      => $request['address2'],
-            'city'          => $request['city'],
-            'zip'           => $request['zip'],
+    private function getRequestStudent($request){
+        return array_merge([
             'birthday'      => $request['birthday'],
             'religion'      => $request['religion'],
-            'blood_type'    => $request['blood_type'],
-        ];
+            'blood_type'    => $request['blood_type']
+        ],
+        $this->getRequest($request) 
+        );
     }
 
     public function create($request){
         try {
             DB::transaction(function () use ($request) {
-                $data = [
-                    'photo'         => (!empty($request['photo']))?$this->convert($request['photo']):null,
-                    'role'          => 'student',
-                    'password'      => Hash::make($request['password']),
-                ];
-
-                array_merge($data, $this->getData($request));
-                $student = User::create($data);
+                $student = User::create($this->getRequestStudent($request));
                 
                 // Store Parents' information
                 $studentParentInfoRepository = new StudentParentInfoRepository();
@@ -78,7 +63,7 @@ class StudentStrategy extends UserRepoStrategy{
     public function update($request){
         try {
             DB::transaction(function () use ($request) {
-                User::where('id', $request['student_id'])->update($this->getData($request));
+                User::where('id', $request['student_id'])->update($this->getRequestStudent($request));
 
                 // Update Parents' information
                 $studentParentInfoRepository = new StudentParentInfoRepository();

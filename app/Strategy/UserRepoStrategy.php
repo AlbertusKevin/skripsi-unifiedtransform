@@ -19,4 +19,19 @@ abstract class UserRepoStrategy{
             throw new \Exception('Failed to change password. '.$e->getMessage());
         }
     }
+
+    protected function getRequest($request){
+        return [
+            'first_name'    => $request['first_name'],
+            'last_name'     => $request['last_name'],
+            'email'         => $request['email'],
+            'gender'        => $request['gender'],
+            'nationality'   => $request['nationality'],
+            'phone'         => $request['phone'],
+            'address'       => $request['address'],
+            'address2'      => $request['address2'],
+            'city'          => $request['city'],
+            'zip'           => $request['zip'],
+        ];
+    }
 }

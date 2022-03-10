@@ -10,21 +10,6 @@ use Illuminate\Support\Facades\Hash;
 class TeacherStrategy extends UserRepoStrategy{
     use Base64ToFile;
 
-    private function getData($request){
-        return [
-            'first_name'    => $request['first_name'],
-            'last_name'     => $request['last_name'],
-            'email'         => $request['email'],
-            'gender'        => $request['gender'],
-            'nationality'   => $request['nationality'],
-            'phone'         => $request['phone'],
-            'address'       => $request['address'],
-            'address2'      => $request['address2'],
-            'city'          => $request['city'],
-            'zip'           => $request['zip']
-        ];
-    }
-
     public function create($request){
         try {
             DB::transaction(function () use ($request) {
@@ -34,7 +19,7 @@ class TeacherStrategy extends UserRepoStrategy{
                     'password'      => Hash::make($request['password']),
                 ];
 
-                $data = array_merge($data, $this->getData($request));
+                $data = array_merge($data, $this->getRequest($request));
                 $user = User::create($data);
                 $user->givePermissionTo(
                     'create exams',
@@ -62,7 +47,7 @@ class TeacherStrategy extends UserRepoStrategy{
     public function update($request){
         try {
             DB::transaction(function () use ($request) {
-                User::where('id', $request['teacher_id'])->update($this->getData($request));
+                User::where('id', $request['teacher_id'])->update($this->getRequest($request));
             });
         } catch (\Exception $e) {
             throw new \Exception('Failed to update Teacher. '.$e->getMessage());
