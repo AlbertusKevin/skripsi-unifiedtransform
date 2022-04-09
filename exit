@@ -1,0 +1,29 @@
+* [33m6621a2b[m[33m ([m[1;31morigin/combine[m[33m, [m[1;32mcombine[m[33m)[m perbaikan strategy pattern store student
+*   [33mdff1136[m merging dengan strategy pattern
+[32m|[m[33m\[m  
+[32m|[m * [33m0a6c01f[m[33m ([m[1;36mHEAD -> [m[1;32mcoba_strategy[m[33m, [m[1;31morigin/coba_strategy[m[33m)[m update strategy
+[32m|[m * [33ma2464e1[m strategy selesai, singleton selesai, testing selesai
+[32m|[m * [33m43531b5[m Pengerjaan strategy pattern pada user repository, pemisahan teacher dan student
+* [33m|[m   [33m9bec023[m Merge branch 'coba_facade' into combine
+[34m|[m[35m\[m [33m\[m  
+[34m|[m * [33m|[m [33md807a8e[m[33m ([m[1;31morigin/coba_facade[m[33m, [m[1;32mcoba_facade[m[33m)[m Implementasi Facade terhadap library Carbon, berhasil
+[34m|[m [33m|[m[33m/[m  
+[34m|[m [33m|[m * [33mf695e49[m[33m ([m[1;35mrefs/stash[m[33m)[m WIP on coba_builder: 45570a7 penerapan builder pattern selesai
+[34m|[m [33m|[m[34m/[m[1;31m|[m 
+[34m|[m[34m/[m[33m|[m [1;31m|[m 
+[34m|[m [33m|[m * [33m1dc0d00[m index on coba_builder: 45570a7 penerapan builder pattern selesai
+[34m|[m [33m|[m[34m/[m  
+[34m|[m[34m/[m[33m|[m   
+* [33m|[m [33m45570a7[m[33m ([m[1;32mcoba_builder[m[33m)[m penerapan builder pattern selesai
+* [33m|[m [33m875d6a4[m[33m ([m[1;31morigin/coba_builder[m[33m)[m proses testing 1
+* [33m|[m [33m4d97258[m pengerjaan builder pattern - next testing
+* [33m|[m [33m6572463[m pengerjaan builder pattern - belum testing
+* [33m|[m [33mc6d2b59[m pengerjaan builder pattern
+* [33m|[m [33mcbb9546[m percobaan builder
+[33m|[m[33m/[m  
+[33m|[m * [33m7e18efc[m[33m ([m[1;31morigin/coba_mediator[m[33m, [m[1;32mcoba_mediator[m[33m)[m pending mediator
+[33m|[m * [33m171863b[m percobaan mediator terhadap method index di AcademicSettingController
+[33m|[m * [33m133b740[m coba 1 mediator
+[33m|[m[33m/[m  
+* [33m9c8a379[m[33m ([m[1;31morigin/data_preprocessing[m[33m, [m[1;32mdata_preprocessing[m[33m, [m[1;32mcoba[m[33m)[m data cleaning - pembersihan method kosong dan perapihan baris kode di class Controller dan pengecekan Interfaces
+* [33md954630[m[33m ([m[1;31morigin/main[m[33m, [m[1;32mmain[m[33m)[m first commit

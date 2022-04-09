@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Traits\SchoolSession;
-use App\Interfaces\UserInterface;
 use App\Interfaces\CourseInterface;
 use App\Interfaces\SectionInterface;
 use App\Interfaces\SemesterInterface;

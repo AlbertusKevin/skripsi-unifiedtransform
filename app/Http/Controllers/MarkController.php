@@ -7,7 +7,6 @@ use App\Http\Controllers\Controller;
 use App\Models\Mark;
 use Illuminate\Http\Request;
 use App\Traits\SchoolSession;
-use App\Interfaces\UserInterface;
 use App\Interfaces\CourseInterface;
 use App\Interfaces\SectionInterface;
 use App\Repositories\ExamRepository;

@@ -15,20 +15,25 @@ use Illuminate\Support\Facades\Hash;
 class StudentStrategy extends UserRepoStrategy{
     use Base64ToFile;
 
-    private function getRequestStudent($request){
-        return array_merge([
-            'birthday'      => $request['birthday'],
-            'religion'      => $request['religion'],
-            'blood_type'    => $request['blood_type']
-        ],
-        $this->getRequest($request) 
+    private function getRequestStudent($request, $create=false){
+        $data = ($create) ? 
+            $this->getRequest($request, 'student', true): 
+            $this->getRequest($request);
+
+        return array_merge(
+            [
+                'birthday'      => $request['birthday'],
+                'religion'      => $request['religion'],
+                'blood_type'    => $request['blood_type']
+            ],
+            $data
         );
     }
 
     public function create($request){
         try {
             DB::transaction(function () use ($request) {
-                $student = User::create($this->getRequestStudent($request));
+                $student = User::create($this->getRequestStudent($request, true));
                 
                 // Store Parents' information
                 $studentParentInfoRepository = new StudentParentInfoRepository();

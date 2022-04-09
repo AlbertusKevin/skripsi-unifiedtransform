@@ -6,7 +6,6 @@ use App\Http\Controllers\Controller;
 use App\Models\Promotion;
 use Illuminate\Http\Request;
 use App\Traits\SchoolSession;
-use App\Interfaces\UserInterface;
 use App\Interfaces\SectionInterface;
 use App\Interfaces\SchoolClassInterface;
 use App\Repositories\PromotionRepository;

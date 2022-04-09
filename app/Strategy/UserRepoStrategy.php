@@ -2,9 +2,12 @@
 namespace App\Strategy;
 
 use App\Models\User;
+use App\Traits\Base64ToFile;
 use Illuminate\Support\Facades\Hash;
 
 abstract class UserRepoStrategy{
+    use Base64ToFile;
+
     abstract public function create($request);
     abstract public function update($request);
     abstract public function find($id);
@@ -20,8 +23,8 @@ abstract class UserRepoStrategy{
         }
     }
 
-    protected function getRequest($request){
-        return [
+    protected function getRequest($request, $role='', $create=false){
+        $data = [
             'first_name'    => $request['first_name'],
             'last_name'     => $request['last_name'],
             'email'         => $request['email'],
@@ -31,7 +34,17 @@ abstract class UserRepoStrategy{
             'address'       => $request['address'],
             'address2'      => $request['address2'],
             'city'          => $request['city'],
-            'zip'           => $request['zip'],
+            'zip'           => $request['zip']
         ];
+
+        if($create){
+            $data = array_merge($data, [
+                'photo'         => (!empty($request['photo']))?$this->convert($request['photo']):null,
+                'password'      => Hash::make($request['password']),
+                'role'          => $role,
+            ]);
+        }
+
+        return $data;
     }
 }

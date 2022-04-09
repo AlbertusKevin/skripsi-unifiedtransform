@@ -8,19 +8,10 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 
 class TeacherStrategy extends UserRepoStrategy{
-    use Base64ToFile;
-
     public function create($request){
         try {
             DB::transaction(function () use ($request) {
-                $data = [
-                    'photo'         => (!empty($request['photo']))?$this->convert($request['photo']):null,
-                    'role'          => 'teacher',
-                    'password'      => Hash::make($request['password']),
-                ];
-
-                $data = array_merge($data, $this->getRequest($request));
-                $user = User::create($data);
+                $user = User::create($this->getRequest($request, 'teacher', true));
                 $user->givePermissionTo(
                     'create exams',
                     'view exams',
