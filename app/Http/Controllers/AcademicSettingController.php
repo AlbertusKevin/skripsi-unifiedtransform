@@ -27,23 +27,11 @@ class AcademicSettingController extends Controller
     protected $semesterRepository;
 
     public function __construct(
-        AcademicSettingInterface $academicSettingRepository,
-        SchoolSessionInterface $schoolSessionRepository,
-        SchoolClassInterface $schoolClassRepository,
-        SectionInterface $schoolSectionRepository,
-        UserInterface $userRepository,
-        CourseInterface $courseRepository,
-        SemesterInterface $semesterRepository
+        AcademicSettingInterface $academicSettingRepository
     ) {
         $this->middleware(['can:view academic settings']);
         $this->mediator = new MediatorRepository();
         $this->academicSettingRepository = $academicSettingRepository;
-        $this->schoolSessionRepository = $schoolSessionRepository;
-        $this->schoolClassRepository = $schoolClassRepository;
-        $this->schoolSectionRepository = $schoolSectionRepository;
-        $this->userRepository = $userRepository;
-        $this->courseRepository = $courseRepository;
-        $this->semesterRepository = $semesterRepository;
     }
 
     /**
