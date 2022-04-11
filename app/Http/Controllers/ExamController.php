@@ -10,6 +10,7 @@ use App\Traits\SchoolSession;
 use App\Interfaces\SemesterInterface;
 use App\Interfaces\SchoolClassInterface;
 use App\Interfaces\SchoolSessionInterface;
+use App\Mediator\MediatorRepository;
 use App\Repositories\AssignedTeacherRepository;
 use App\Repositories\ExamRepository;
 
@@ -26,6 +27,7 @@ class ExamController extends Controller
         $this->schoolSessionRepository = $schoolSessionRepository;
         $this->schoolClassRepository = $schoolClassRepository;
         $this->semesterRepository = $semesterRepository;
+        $this->mediator = new MediatorRepository();
     }
     /**
      * Display a listing of the resource.
@@ -35,26 +37,11 @@ class ExamController extends Controller
      */
     public function index(Request $request)
     {
-        $class_id = $request->query('class_id', 0);
-        $semester_id = $request->query('semester_id', 0);
-        $current_school_session_id = $this->getSchoolCurrentSession();
-        $semesters = $this->semesterRepository->getAll($current_school_session_id);
-        $school_classes = $this->schoolClassRepository->getAllBySession($current_school_session_id);
-        $examRepository = new ExamRepository();
-        $exams = $examRepository->getAll($current_school_session_id, $semester_id, $class_id);
-        $assignedTeacherRepository = new AssignedTeacherRepository();
-        $teacher_id = (auth()->user()->role == "teacher")?auth()->user()->id : 0;
-        $teacherCourses = $assignedTeacherRepository->getTeacherCourses($current_school_session_id, $teacher_id, $semester_id);
-
-        $data = [
-            'current_school_session_id' => $current_school_session_id,
-            'semesters'                 => $semesters,
-            'classes'                   => $school_classes,
-            'exams'                     => $exams,
-            'teacher_courses'           => $teacherCourses,
-        ];
-
-        return view('exams.index', $data);
+        return view('exams.index', $this->mediator->getData($this, "index", [
+            "class_id" => $request->query('class_id', 0),
+            "semester_id" => $request->query('semester_id', 0),
+            "teacher_id" => (auth()->user()->role == "teacher")?auth()->user()->id : 0
+        ]));
     }
 
     /**
@@ -64,31 +51,7 @@ class ExamController extends Controller
      */
     public function create()
     {
-        $current_school_session_id = $this->getSchoolCurrentSession();
-        $semesters = $this->semesterRepository->getAll($current_school_session_id);
-
-        if(auth()->user()->role == "teacher") {
-            $teacher_id = auth()->user()->id;
-            $assigned_classes = $this->schoolClassRepository->getAllBySessionAndTeacher($current_school_session_id, $teacher_id);
-
-            $school_classes = [];
-            $i = 0;
-
-            foreach($assigned_classes as $assigned_class) {
-                $school_classes[$i] = $assigned_class->schoolClass;
-                $i++;
-            }
-        } else {
-            $school_classes = $this->schoolClassRepository->getAllBySession($current_school_session_id);
-        }
-
-        $data = [
-            'current_school_session_id' => $current_school_session_id,
-            'semesters'                 => $semesters,
-            'classes'                   => $school_classes,
-        ];
-
-        return view('exams.create', $data);
+        return view('exams.create', $this->mediator->getData($this, "create"));
     }
 
     /**

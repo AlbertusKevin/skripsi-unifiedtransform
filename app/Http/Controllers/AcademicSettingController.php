@@ -27,9 +27,7 @@ class AcademicSettingController extends Controller
      */
     public function index()
     {
-        $data = $this->mediator->getData($this,"index");
-        dd($data);
-        return view('academics.settings', $data);
+        return view('academics.settings', $this->mediator->getData($this,"index"));
     }
 
     /**

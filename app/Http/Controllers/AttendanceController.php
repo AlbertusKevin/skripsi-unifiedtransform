@@ -77,37 +77,13 @@ class AttendanceController extends Controller
         if($request->query('class_id') == null){
             return abort(404);
         }
+
         try{
-            $academic_setting = $this->academicSettingRepository->getAcademicSetting();
-            $current_school_session_id = $this->getSchoolCurrentSession();
-
-            $class_id = $request->query('class_id');
-            $section_id = $request->query('section_id', 0);
-            $course_id = $request->query('course_id');
-
-            $student_list = $this->userRepository->getAllStudents($current_school_session_id, $class_id, $section_id);
-
-            $school_class = $this->schoolClassRepository->findById($class_id);
-            $school_section = $this->sectionRepository->findById($section_id);
-
-            $attendanceRepository = new AttendanceRepository();
-
-            if($academic_setting->attendance_type == 'section') {
-                $attendance_count = $attendanceRepository->getSectionAttendance($class_id, $section_id, $current_school_session_id)->count();
-            } else {
-                $attendance_count = $attendanceRepository->getCourseAttendance($class_id, $course_id, $current_school_session_id)->count();
-            }
-
-            $data = [
-                'current_school_session_id' => $current_school_session_id,
-                'academic_setting'  => $academic_setting,
-                'student_list'      => $student_list,
-                'school_class'      => $school_class,
-                'school_section'    => $school_section,
-                'attendance_count'  => $attendance_count,
-            ];
-
-            return view('attendances.take', $data);
+            return view('attendances.take', $this->mediator->getData($this, "create", [
+                "class_id" => $request->query('class_id'),
+                "section_id" => $request->query('section_id', 0),
+                "course_id" => $request->query('course_id')
+            ]));
         } catch (\Exception $e) {
             return back()->withError($e->getMessage());
         }
@@ -142,26 +118,13 @@ class AttendanceController extends Controller
         if($request->query('class_id') == null){
             return abort(404);
         }
-
-        $current_school_session_id = $this->getSchoolCurrentSession();
-
-        $class_id = $request->query('class_id');
-        $section_id = $request->query('section_id');
-        $course_id = $request->query('course_id');
-
-        $attendanceRepository = new AttendanceRepository();
-
+    
         try {
-            //todo: ssss
-            $academic_setting = $this->academicSettingRepository->getAcademicSetting();
-            if($academic_setting->attendance_type == 'section') {
-                $attendances = $attendanceRepository->getSectionAttendance($class_id, $section_id, $current_school_session_id);
-            } else {
-                $attendances = $attendanceRepository->getCourseAttendance($class_id, $course_id, $current_school_session_id);
-            }
-            $data = ['attendances' => $attendances];
-            
-            return view('attendances.view', $data);
+            return view('attendances.view', $this->mediator->getData($this, "show", [
+                "class_id" => $request->query('class_id'),
+                "section_id" => $request->query('section_id'),
+                "course_id" => $request->query('course_id')
+            ]));
         } catch (\Exception $e) {
             return back()->withError($e->getMessage());
         }
@@ -171,17 +134,7 @@ class AttendanceController extends Controller
         if(auth()->user()->role == "student" && auth()->user()->id != $id) {
             return abort(404);
         }
-        $current_school_session_id = $this->getSchoolCurrentSession();
 
-        $attendanceRepository = new AttendanceRepository();
-        $attendances = $attendanceRepository->getStudentAttendance($current_school_session_id, $id);
-        $student = $this->userRepository->findStudent($id);
-
-        $data = [
-            'attendances'   => $attendances,
-            'student'       => $student,
-        ];
-
-        return view('attendances.attendance', $data);
+        return view('attendances.attendance', $this->mediator->getData($this,"show_student_attendace",["id" => $id]));
     }
 }
