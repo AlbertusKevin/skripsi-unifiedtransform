@@ -2,5 +2,5 @@
 namespace App\Mediator;
 
 interface Mediator{
-    public function getData($object, $event, $data = []);
+    public function getData($sender, $event, $data = []);
 }

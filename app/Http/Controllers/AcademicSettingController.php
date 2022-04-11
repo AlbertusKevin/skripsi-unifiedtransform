@@ -4,27 +4,13 @@ namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use App\Traits\SchoolSession;
-use App\Interfaces\UserInterface;
-use App\Interfaces\CourseInterface;
-use App\Interfaces\SectionInterface;
-use App\Interfaces\SemesterInterface;
-use App\Interfaces\SchoolClassInterface;
-use App\Interfaces\SchoolSessionInterface;
 use App\Interfaces\AcademicSettingInterface;
 use App\Http\Requests\AttendanceTypeUpdateRequest;
 use App\Mediator\MediatorRepository;
 
 class AcademicSettingController extends Controller
 {
-    use SchoolSession;
     protected $academicSettingRepository;
-    protected $schoolSessionRepository;
-    protected $schoolClassRepository;
-    protected $schoolSectionRepository;
-    protected $userRepository;
-    protected $courseRepository;
-    protected $semesterRepository;
 
     public function __construct(
         AcademicSettingInterface $academicSettingRepository
@@ -41,8 +27,8 @@ class AcademicSettingController extends Controller
      */
     public function index()
     {
-        $param = ["school_session_id" => $this->getSchoolCurrentSession()];
-        $data = $this->mediator->getData($this,"index",$param);
+        $data = $this->mediator->getData($this,"index");
+        dd($data);
         return view('academics.settings', $data);
     }
 
