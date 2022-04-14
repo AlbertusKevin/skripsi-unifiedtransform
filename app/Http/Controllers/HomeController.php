@@ -8,6 +8,8 @@ use App\Interfaces\UserInterface;
 use App\Repositories\NoticeRepository;
 use App\Interfaces\SchoolClassInterface;
 use App\Interfaces\SchoolSessionInterface;
+use App\Mediator\Mediator;
+use App\Mediator\MediatorRepository;
 use App\Repositories\PromotionRepository;
 
 class HomeController extends Controller
@@ -21,13 +23,10 @@ class HomeController extends Controller
      *
      * @return void
      */
-    public function __construct(
-        UserInterface $userRepository, SchoolSessionInterface $schoolSessionRepository, SchoolClassInterface $schoolClassRepository)
+    public function __construct()
     {
         // $this->middleware('auth');
-        $this->userRepository = $userRepository;
-        $this->schoolSessionRepository = $schoolSessionRepository;
-        $this->schoolClassRepository = $schoolClassRepository;
+        $this->mediator = new MediatorRepository();
     }
 
     /**
@@ -37,23 +36,6 @@ class HomeController extends Controller
      */
     public function index()
     {
-        $current_school_session_id = $this->getSchoolCurrentSession();
-        $classCount = $this->schoolClassRepository->getAllBySession($current_school_session_id)->count();
-        $studentCount = $this->userRepository->getAllStudentsBySessionCount($current_school_session_id);
-        $promotionRepository = new PromotionRepository();
-        $maleStudentsBySession = $promotionRepository->getMaleStudentsBySessionCount($current_school_session_id);
-        $teacherCount = $this->userRepository->getAllTeachers()->count();
-        $noticeRepository = new NoticeRepository();
-        $notices = $noticeRepository->getAll($current_school_session_id);
-
-        $data = [
-            'classCount'    => $classCount,
-            'studentCount'  => $studentCount,
-            'teacherCount'  => $teacherCount,
-            'notices'       => $notices,
-            'maleStudentsBySession' => $maleStudentsBySession,
-        ];
-
-        return view('home', $data);
+        return view('home', $this->mediator->getData($this,"index"));
     }
 }

@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
-use App\Models\Promotion;
 use Illuminate\Http\Request;
 use App\Traits\SchoolSession;
 use App\Interfaces\UserInterface;
@@ -11,6 +10,7 @@ use App\Interfaces\SectionInterface;
 use App\Interfaces\SchoolClassInterface;
 use App\Repositories\PromotionRepository;
 use App\Interfaces\SchoolSessionInterface;
+use App\Mediator\MediatorRepository;
 
 class PromotionController extends Controller
 {
@@ -37,6 +37,7 @@ class PromotionController extends Controller
         $this->userRepository = $userRepository;
         $this->schoolClassRepository = $schoolClassRepository;
         $this->schoolSectionRepository = $schoolSectionRepository;
+        $this->mediator = new MediatorRepository();
     }
     /**
      * Display a listing of the resource.
@@ -46,28 +47,11 @@ class PromotionController extends Controller
      */
     public function index(Request $request)
     {
-        $class_id = $request->query('class_id', 0);
+        $data = $this->mediator->getData($this,"index",["class_id" => $request->query('class_id', 0)]);
 
-        $promotionRepository = new PromotionRepository();
-        $previousSession = $this->schoolSessionRepository->getPreviousSession();
-
-        if(count($previousSession) < 1) {
+        if(array_key_exists("error", $data)) {
             return back()->withError('No previous session');
         }
-
-        $previousSessionClasses = $promotionRepository->getClasses($previousSession['id']);
-        $previousSessionSections = $promotionRepository->getSections($previousSession['id'], $class_id);
-        $current_school_session_id = $this->getSchoolCurrentSession();
-        $currentSessionSections = $promotionRepository->getSectionsBySession($current_school_session_id);
-        $currentSessionSectionsCounts = $currentSessionSections->count();
-
-        $data = [
-            'previousSessionClasses'        => $previousSessionClasses,
-            'class_id'                      => $class_id,
-            'previousSessionSections'       => $previousSessionSections,
-            'currentSessionSectionsCounts'  => $currentSessionSectionsCounts,
-            'previousSessionId'             => $previousSession['id'],
-        ];
 
         return view('promotions.index', $data);
     }
@@ -89,18 +73,11 @@ class PromotionController extends Controller
                 return abort(404);
             }
 
-            $students = $this->userRepository->getAllStudents($session_id, $class_id, $section_id);
-            $schoolClass = $this->schoolClassRepository->findById($class_id);
-            $section = $this->schoolSectionRepository->findById($section_id);
-            $latest_school_session = $this->schoolSessionRepository->getLatestSession();
-            $school_classes = $this->schoolClassRepository->getAllBySession($latest_school_session->id);
-
-            $data = [
-                'students'      => $students,
-                'schoolClass'   => $schoolClass,
-                'section'       => $section,
-                'school_classes'=> $school_classes,
-            ];
+            $data = $this->mediator->getData($this, "create", [
+                "class_id" => $request->query('previous_class_id'),
+                "section_id" => $request->query('previous_section_id'),
+                "session_id" => $request->query('previousSessionId')
+            ]);
 
             return view('promotions.promote', $data);
         } catch (\Exception $e) {

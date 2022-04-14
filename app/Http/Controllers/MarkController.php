@@ -56,51 +56,29 @@ class MarkController extends Controller
      */
     public function index(Request $request)
     {
-        $class_id = $request->query('class_id', 0);
-        $section_id = $request->query('section_id', 0);
-        $course_id = $request->query('course_id', 0);
-        $semester_id = $request->query('semester_id', 0);
-
-        $current_school_session_id = $this->getSchoolCurrentSession();
-        $semesters = $this->semesterRepository->getAll($current_school_session_id);
-        $school_classes = $this->schoolClassRepository->getAllBySession($current_school_session_id);
-        $markRepository = new MarkRepository();
-        $marks = $markRepository->getAllFinalMarks($current_school_session_id, $semester_id, $class_id, $section_id, $course_id);
-
-        if(!$marks) {
+        $data = $this->mediator->getData($this,"index",[
+            "class_id" => $request->query('class_id', 0),
+            "section_id" => $request->query('section_id', 0),
+            "course_id" => $request->query('course_id', 0),
+            "semester_id" => $request->query('semester_id', 0)
+        ]);
+        
+        if(!$data["marks"]) {
             return abort(404);
         }
 
-        $gradingSystemRepository = new GradingSystemRepository();
-        $gradingSystem = $gradingSystemRepository->getGradingSystem($current_school_session_id, $semester_id, $class_id);
-
-        if(!$gradingSystem) {
+        if(!$data["grading_system_rules"]) {
             return abort(404);
         }
 
-        $gradeRulesRepository = new GradeRuleRepository();
-        $gradingSystemRules = $gradeRulesRepository->getAll($current_school_session_id, $gradingSystem->id);
-
-        if(!$gradingSystemRules) {
-            return abort(404);
-        }
-
-        foreach($marks as $mark_key => $mark) {
-            foreach ($gradingSystemRules as $key => $gradingSystemRule) {
+        foreach($data["marks"] as $mark_key => $mark) {
+            foreach ($data["grading_system_rules"] as $key => $gradingSystemRule) {
                 if($mark->final_marks >= $gradingSystemRule->start_at && $mark->final_marks <= $gradingSystemRule->end_at) {
-                    $marks[$mark_key]['point'] = $gradingSystemRule->point;
-                    $marks[$mark_key]['grade'] = $gradingSystemRule->grade;
+                    $data["marks"][$mark_key]['point'] = $gradingSystemRule->point;
+                    $data["marks"][$mark_key]['grade'] = $gradingSystemRule->grade;
                 }
             }
         }
-
-        $data = [
-            'current_school_session_id' => $current_school_session_id,
-            'semesters'                 => $semesters,
-            'classes'                   => $school_classes,
-            'marks'                     => $marks,
-            'grading_system_rules'      => $gradingSystemRules,
-        ];
 
         return view('marks.results', $data);
     }
@@ -113,42 +91,14 @@ class MarkController extends Controller
      */
     public function create(Request $request)
     {
-        $class_id = $request->query('class_id');
-        $section_id = $request->query('section_id');
-        $course_id = $request->query('course_id');
-        $semester_id = $request->query('semester_id', 0);
-        
         try{
-            $current_school_session_id = $this->getSchoolCurrentSession();
-            $this->checkIfLoggedInUserIsAssignedTeacher($request, $current_school_session_id);
-            $academic_setting = $this->academicSettingRepository->getAcademicSetting();
-            $examRepository = new ExamRepository();
-            $exams = $examRepository->getAll($current_school_session_id, $semester_id, $class_id);
-            $markRepository = new MarkRepository();
-            $studentsWithMarks = $markRepository->getAll($current_school_session_id, $semester_id, $class_id, $section_id, $course_id);
-            $studentsWithMarks = $studentsWithMarks->groupBy('student_id');
-            $sectionStudents = $this->userRepository->getAllStudents($current_school_session_id, $class_id, $section_id);
-            $final_marks_submitted = false;
-            $final_marks_submit_count = $markRepository->getFinalMarksCount($current_school_session_id, $semester_id, $class_id, $section_id, $course_id);
-
-            if($final_marks_submit_count > 0) {
-                $final_marks_submitted = true;
-            }
-
-            $data = [
-                'academic_setting'          => $academic_setting,
-                'exams'                     => $exams,
-                'students_with_marks'       => $studentsWithMarks,
-                'class_id'                  => $class_id,
-                'section_id'                => $section_id,
-                'course_id'                 => $course_id,
-                'semester_id'               => $semester_id,
-                'final_marks_submitted'     => $final_marks_submitted,
-                'sectionStudents'           => $sectionStudents,
-                'current_school_session_id' => $current_school_session_id,
-            ];
-
-            return view('marks.create', $data);
+            return view('marks.create', $this->mediator->getData($this,"create",[
+                "request" => $request,
+                "class_id" => $request->query('class_id'),
+                "section_id" => $request->query('section_id'),
+                "course_id" => $request->query('course_id'),
+                "semester_id" => $request->query('semester_id', 0),
+            ]));
         } catch (\Exception $e) {
             return back()->withError($e->getMessage());
         }
@@ -262,51 +212,35 @@ class MarkController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
+
     public function showCourseMark(Request $request)
     {
-        $session_id = $request->query('session_id');
-        $semester_id = $request->query('semester_id');
-        $class_id = $request->query('class_id');
-        $section_id = $request->query('section_id');
-        $course_id = $request->query('course_id');
-        $course_name = $request->query('course_name');
-        $student_id = $request->query('student_id');
-        $markRepository = new MarkRepository();
-        $marks = $markRepository->getAllByStudentId($session_id, $semester_id, $class_id, $section_id, $course_id, $student_id);
-        $finalMarks = $markRepository->getAllFinalMarksByStudentId($session_id, $student_id, $semester_id, $class_id, $section_id, $course_id);
+        $data = $this->mediator->getData($this,"show_course_mark",[
+            "class_id" => $request->query('class_id'),
+            "section_id" => $request->query('section_id'),
+            "course_id" => $request->query('course_id'),
+            "semester_id" => $request->query('semester_id'),
+            "session_id" => $request->query('session_id'),
+            "course_name" => $request->query('course_name'),
+            "student_id" => $request->query('student_id')
+        ]);
 
-        if(!$finalMarks) {
+        if(!$data["finalMarks"]) {
             return abort(404);
         }
 
-        $gradingSystemRepository = new GradingSystemRepository();
-        $gradingSystem = $gradingSystemRepository->getGradingSystem($session_id, $semester_id, $class_id);
-
-        if(!$gradingSystem) {
+        if(!$data["gradingSystemRules"]) {
             return abort(404);
         }
 
-        $gradeRulesRepository = new GradeRuleRepository();
-        $gradingSystemRules = $gradeRulesRepository->getAll($session_id, $gradingSystem->id);
-
-        if(!$gradingSystemRules) {
-            return abort(404);
-        }
-
-        foreach($finalMarks as $mark_key => $mark) {
-            foreach ($gradingSystemRules as $key => $gradingSystemRule) {
+        foreach($data["finalMarks"] as $mark_key => $mark) {
+            foreach ($data["gradingSystemRules"] as $key => $gradingSystemRule) {
                 if($mark->final_marks >= $gradingSystemRule->start_at && $mark->final_marks <= $gradingSystemRule->end_at) {
-                    $finalMarks[$mark_key]['point'] = $gradingSystemRule->point;
-                    $finalMarks[$mark_key]['grade'] = $gradingSystemRule->grade;
+                    $data["finalMarks"][$mark_key]['point'] = $gradingSystemRule->point;
+                    $data["finalMarks"][$mark_key]['grade'] = $gradingSystemRule->grade;
                 }
             }
         }
-
-        $data = [
-            'marks' => $marks,
-            'final_marks'   => $finalMarks,
-            'course_name' => $course_name,
-        ];
 
         return view('marks.student', $data);
     }
