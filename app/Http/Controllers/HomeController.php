@@ -10,9 +10,6 @@ use App\Mediator\MediatorHome;
 class HomeController extends Controller
 {
     use SchoolSession;
-    protected $schoolSessionRepository;
-    protected $schoolClassRepository;
-    protected $userRepository;
     protected Mediator $mediator;
     /**
      * Create a new controller instance.

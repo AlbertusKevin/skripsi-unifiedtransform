@@ -3,46 +3,19 @@
 namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
-use App\Models\Attendance;
 use Illuminate\Http\Request;
-use App\Interfaces\UserInterface;
-use App\Interfaces\SchoolClassInterface;
-use App\Interfaces\SchoolSessionInterface;
-use App\Interfaces\AcademicSettingInterface;
 use App\Http\Requests\AttendanceStoreRequest;
-use App\Interfaces\SectionInterface;
 use App\Mediator\Mediator;
 use App\Mediator\MediatorAttendance;
-use App\Mediator\MediatorRepository;
 use App\Repositories\AttendanceRepository;
-use App\Repositories\CourseRepository;
-use App\Traits\SchoolSession;
 
 class AttendanceController extends Controller
 {
-    use SchoolSession;
-    protected $academicSettingRepository;
-    protected $schoolSessionRepository;
-    protected $schoolClassRepository;
-    protected $sectionRepository;
-    protected $userRepository;
     protected Mediator $mediator;
 
-    public function __construct(
-        UserInterface $userRepository,
-        AcademicSettingInterface $academicSettingRepository,
-        SchoolSessionInterface $schoolSessionRepository,
-        SchoolClassInterface $schoolClassRepository,
-        SectionInterface $sectionRepository
-    ) {
+    public function __construct() {
         $this->middleware(['can:view attendances']);
-
         $this->mediator = new MediatorAttendance();
-        $this->userRepository = $userRepository;
-        $this->academicSettingRepository = $academicSettingRepository;
-        $this->schoolSessionRepository = $schoolSessionRepository;
-        $this->schoolClassRepository = $schoolClassRepository;
-        $this->sectionRepository = $sectionRepository;
     }
     /**
      * Display a listing of the resource.
@@ -80,7 +53,7 @@ class AttendanceController extends Controller
         if($request->query('class_id') == null){
             return abort(404);
         }
-
+        
         try{
             return view('attendances.take', $this->mediator->getData($this, "create", [
                 "class_id" => $request->query('class_id'),
@@ -88,6 +61,7 @@ class AttendanceController extends Controller
                 "course_id" => $request->query('course_id')
             ]));
         } catch (\Exception $e) {
+            dd($e->getMessage());
             return back()->withError($e->getMessage());
         }
     }

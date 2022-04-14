@@ -4,7 +4,7 @@ namespace App\Mediator;
 class MediatorMark extends Mediator{
     public function getData($sender, $event, $data = []){
         if($event == "index"){
-            $gradingSystem = $this->gradingSystemRepository->getGradingSystem($this->school_session_id, $data["semester_id"], $data["class_id"]);
+            $gradingSystem = $this->gradeRulesRepository->getGradingSystem($this->school_session_id, $data["semester_id"], $data["class_id"]);
 
             return [
                 'current_school_session_id' => $this->school_session_id,
@@ -36,11 +36,11 @@ class MediatorMark extends Mediator{
         }
 
         if($event == "show_course_mark"){
-            $gradingSystem = $this->gradingSystemRepository->getGradingSystem($data["session_id"], $data["semester_id"], $data["class_id"]);
+            $gradingSystem = $this->gradeRulesRepository->getGradingSystem($data["session_id"], $data["semester_id"], $data["class_id"]);
 
             return [
                 "marks" => $this->markRepository->getAllByStudentId($data["session_id"], $data["semester_id"], $data["class_id"], $data["section_id"], $data["course_id"], $data["student_id"]),
-                "finalMarks" => $this->markRepository->getAllFinalMarksByStudentId($data["session_id"], $data["student_id"], $data["semester_id"], $data["class_id"], $data["section_id"], $data["course_id"]),
+                "final_marks" => $this->markRepository->getAllFinalMarksByStudentId($data["session_id"], $data["student_id"], $data["semester_id"], $data["class_id"], $data["section_id"], $data["course_id"]),
                 "gradingSystemRules" => (!$gradingSystem) ? null : $this->gradeRulesRepository->getAll($data["session_id"], $gradingSystem->id),
                 'course_name' => $data["course_name"],
             ];

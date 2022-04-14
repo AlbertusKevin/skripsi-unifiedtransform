@@ -3,53 +3,20 @@
 namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
-use App\Models\Mark;
 use Illuminate\Http\Request;
 use App\Traits\SchoolSession;
-use App\Interfaces\UserInterface;
-use App\Interfaces\CourseInterface;
-use App\Interfaces\SectionInterface;
-use App\Repositories\ExamRepository;
 use App\Repositories\MarkRepository;
 use App\Traits\AssignedTeacherCheck;
-use App\Interfaces\SemesterInterface;
-use App\Interfaces\SchoolClassInterface;
-use App\Repositories\GradeRuleRepository;
-use App\Interfaces\SchoolSessionInterface;
-use App\Interfaces\AcademicSettingInterface;
 use App\Mediator\Mediator;
 use App\Mediator\MediatorMark;
-use App\Repositories\GradingSystemRepository;
 
 class MarkController extends Controller
 {
     use SchoolSession, AssignedTeacherCheck;
 
-    protected $academicSettingRepository;
-    protected $userRepository;
-    protected $schoolClassRepository;
-    protected $schoolSectionRepository;
-    protected $courseRepository;
-    protected $semesterRepository;
-    protected $schoolSessionRepository;
     protected Mediator $mediator;
 
-    public function __construct(
-        AcademicSettingInterface $academicSettingRepository,
-        UserInterface $userRepository,
-        SchoolSessionInterface $schoolSessionRepository,
-        SchoolClassInterface $schoolClassRepository,
-        SectionInterface $schoolSectionRepository,
-        CourseInterface $courseRepository,
-        SemesterInterface $semesterRepository
-    ) {
-        $this->academicSettingRepository = $academicSettingRepository;
-        $this->userRepository = $userRepository;
-        $this->schoolSessionRepository = $schoolSessionRepository;
-        $this->schoolClassRepository = $schoolClassRepository;
-        $this->schoolSectionRepository = $schoolSectionRepository;
-        $this->courseRepository = $courseRepository;
-        $this->semesterRepository = $semesterRepository;
+    public function __construct() {
         $this->mediator = new MediatorMark();
     }
     /**
@@ -229,7 +196,7 @@ class MarkController extends Controller
             "student_id" => $request->query('student_id')
         ]);
 
-        if(!$data["finalMarks"]) {
+        if(!$data["final_marks"]) {
             return abort(404);
         }
 
@@ -237,11 +204,13 @@ class MarkController extends Controller
             return abort(404);
         }
 
-        foreach($data["finalMarks"] as $mark_key => $mark) {
+        dd($data["final_marks"], $data["gradingSystemRules"]);
+        foreach($data["final_marks"] as $mark_key => $mark) {
             foreach ($data["gradingSystemRules"] as $key => $gradingSystemRule) {
                 if($mark->final_marks >= $gradingSystemRule->start_at && $mark->final_marks <= $gradingSystemRule->end_at) {
-                    $data["finalMarks"][$mark_key]['point'] = $gradingSystemRule->point;
-                    $data["finalMarks"][$mark_key]['grade'] = $gradingSystemRule->grade;
+                    dd($gradingSystemRule->point, $gradingSystemRule->grade);
+                    $data["final_marks"][$mark_key]['point'] = $gradingSystemRule->point;
+                    $data["final_marks"][$mark_key]['grade'] = $gradingSystemRule->grade;
                 }
             }
         }

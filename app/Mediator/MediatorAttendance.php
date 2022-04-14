@@ -33,9 +33,9 @@ class MediatorAttendance extends Mediator{
 
     private function getAttendances(string $attendance_type, array $data){
         if($attendance_type == 'section') {
-            return $this->attendanceRepository->getSectionAttendance($data["class_id"], $data["section_id"], $data["current_school_session_id"]);
+            return $this->attendanceRepository->getSectionAttendance($data["class_id"], $data["section_id"], $this->school_session_id);
         }
 
-        return $this->attendanceRepository->getCourseAttendance($data["class_id"], $data["course_id"], $data["current_school_session_id"]);
+        return $this->attendanceRepository->getCourseAttendance($data["class_id"], $data["course_id"], $this->school_session_id);
     }
 }

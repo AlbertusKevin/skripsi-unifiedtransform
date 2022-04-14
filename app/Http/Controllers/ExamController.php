@@ -4,32 +4,18 @@ namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\ExamStoreRequest;
-use App\Models\Exam;
 use Illuminate\Http\Request;
 use App\Traits\SchoolSession;
-use App\Interfaces\SemesterInterface;
-use App\Interfaces\SchoolClassInterface;
-use App\Interfaces\SchoolSessionInterface;
 use App\Mediator\Mediator;
 use App\Mediator\MediatorExam;
-use App\Mediator\MediatorRepository;
-use App\Repositories\AssignedTeacherRepository;
 use App\Repositories\ExamRepository;
 
 class ExamController extends Controller
 {
-    use SchoolSession;
-
-    protected $schoolClassRepository;
-    protected $semesterRepository;
-    protected $schoolSessionRepository;
     protected Mediator $mediator;
 
-    public function __construct(SchoolSessionInterface $schoolSessionRepository, SchoolClassInterface $schoolClassRepository, SemesterInterface $semesterRepository)
+    public function __construct()
     {
-        $this->schoolSessionRepository = $schoolSessionRepository;
-        $this->schoolClassRepository = $schoolClassRepository;
-        $this->semesterRepository = $semesterRepository;
         $this->mediator = new MediatorExam();
     }
     /**

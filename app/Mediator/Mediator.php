@@ -34,9 +34,8 @@ abstract class Mediator{
     protected NoticeRepository $noticeRepository;
     protected GradingSystemRepository $gradeRulesRepository;
     protected MarkRepository $markRepository;
-
-    protected $school_session_id = $this->getSchoolCurrentSession();
-    protected $academic_setting = $this->academicSettingRepository->getAcademicSetting();
+    protected $school_session_id;
+    protected $academic_setting;
 
     public function __construct()
     {
@@ -54,6 +53,9 @@ abstract class Mediator{
         $this->noticeRepository = new NoticeRepository();
         $this->markRepository = new MarkRepository();
         $this->gradeRulesRepository = new GradingSystemRepository();
+
+        $this->school_session_id = $this->getSchoolCurrentSession();
+        $this->academic_setting = $this->academicSettingRepository->getAcademicSetting();
     }
     
     abstract public function getData($sender, $event, $data = []);
