@@ -204,11 +204,9 @@ class MarkController extends Controller
             return abort(404);
         }
 
-        dd($data["final_marks"], $data["gradingSystemRules"]);
         foreach($data["final_marks"] as $mark_key => $mark) {
             foreach ($data["gradingSystemRules"] as $key => $gradingSystemRule) {
                 if($mark->final_marks >= $gradingSystemRule->start_at && $mark->final_marks <= $gradingSystemRule->end_at) {
-                    dd($gradingSystemRule->point, $gradingSystemRule->grade);
                     $data["final_marks"][$mark_key]['point'] = $gradingSystemRule->point;
                     $data["final_marks"][$mark_key]['grade'] = $gradingSystemRule->grade;
                 }

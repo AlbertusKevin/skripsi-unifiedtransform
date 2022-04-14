@@ -6,6 +6,7 @@ use App\Repositories\AssignedTeacherRepository;
 use App\Repositories\AttendanceRepository;
 use App\Repositories\CourseRepository;
 use App\Repositories\ExamRepository;
+use App\Repositories\GradeRuleRepository;
 use App\Repositories\GradingSystemRepository;
 use App\Repositories\MarkRepository;
 use App\Repositories\NoticeRepository;
@@ -32,7 +33,8 @@ abstract class Mediator{
     protected AssignedTeacherRepository $assignedTeacherRepository;
     protected PromotionRepository $promotionRepository;
     protected NoticeRepository $noticeRepository;
-    protected GradingSystemRepository $gradeRulesRepository;
+    protected GradingSystemRepository $gradeSystemRepository;
+    protected GradeRuleRepository $gradeRulesRepository;
     protected MarkRepository $markRepository;
     protected $school_session_id;
     protected $academic_setting;
@@ -52,7 +54,8 @@ abstract class Mediator{
         $this->promotionRepository = new PromotionRepository();
         $this->noticeRepository = new NoticeRepository();
         $this->markRepository = new MarkRepository();
-        $this->gradeRulesRepository = new GradingSystemRepository();
+        $this->gradeSystemRepository = new GradingSystemRepository();
+        $this->gradeRulesRepository = new GradeRuleRepository();
 
         $this->school_session_id = $this->getSchoolCurrentSession();
         $this->academic_setting = $this->academicSettingRepository->getAcademicSetting();
