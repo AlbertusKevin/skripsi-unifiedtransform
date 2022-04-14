@@ -10,6 +10,8 @@ use App\Interfaces\SectionInterface;
 use App\Interfaces\SchoolClassInterface;
 use App\Repositories\PromotionRepository;
 use App\Interfaces\SchoolSessionInterface;
+use App\Mediator\Mediator;
+use App\Mediator\MediatorPromotion;
 use App\Mediator\MediatorRepository;
 
 class PromotionController extends Controller
@@ -20,6 +22,7 @@ class PromotionController extends Controller
     protected $userRepository;
     protected $schoolClassRepository;
     protected $schoolSectionRepository;
+    protected Mediator $mediator;
 
     /**
     * Create a new Controller instance
@@ -37,7 +40,7 @@ class PromotionController extends Controller
         $this->userRepository = $userRepository;
         $this->schoolClassRepository = $schoolClassRepository;
         $this->schoolSectionRepository = $schoolSectionRepository;
-        $this->mediator = new MediatorRepository();
+        $this->mediator = new MediatorPromotion();
     }
     /**
      * Display a listing of the resource.
@@ -50,7 +53,7 @@ class PromotionController extends Controller
         $data = $this->mediator->getData($this,"index",["class_id" => $request->query('class_id', 0)]);
 
         if(array_key_exists("error", $data)) {
-            return back()->withError('No previous session');
+            return back()->withError($data['error']);
         }
 
         return view('promotions.index', $data);

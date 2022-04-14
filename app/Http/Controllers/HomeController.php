@@ -3,14 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
-use App\Traits\SchoolSession;
-use App\Interfaces\UserInterface;
-use App\Repositories\NoticeRepository;
-use App\Interfaces\SchoolClassInterface;
-use App\Interfaces\SchoolSessionInterface;
 use App\Mediator\Mediator;
-use App\Mediator\MediatorRepository;
-use App\Repositories\PromotionRepository;
+use App\Traits\SchoolSession;
+use App\Mediator\MediatorHome;
 
 class HomeController extends Controller
 {
@@ -18,6 +13,7 @@ class HomeController extends Controller
     protected $schoolSessionRepository;
     protected $schoolClassRepository;
     protected $userRepository;
+    protected Mediator $mediator;
     /**
      * Create a new controller instance.
      *
@@ -26,7 +22,7 @@ class HomeController extends Controller
     public function __construct()
     {
         // $this->middleware('auth');
-        $this->mediator = new MediatorRepository();
+        $this->mediator = new MediatorHome();
     }
 
     /**

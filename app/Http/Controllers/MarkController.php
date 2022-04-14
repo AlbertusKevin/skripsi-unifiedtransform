@@ -17,6 +17,8 @@ use App\Interfaces\SchoolClassInterface;
 use App\Repositories\GradeRuleRepository;
 use App\Interfaces\SchoolSessionInterface;
 use App\Interfaces\AcademicSettingInterface;
+use App\Mediator\Mediator;
+use App\Mediator\MediatorMark;
 use App\Repositories\GradingSystemRepository;
 
 class MarkController extends Controller
@@ -30,6 +32,7 @@ class MarkController extends Controller
     protected $courseRepository;
     protected $semesterRepository;
     protected $schoolSessionRepository;
+    protected Mediator $mediator;
 
     public function __construct(
         AcademicSettingInterface $academicSettingRepository,
@@ -47,6 +50,7 @@ class MarkController extends Controller
         $this->schoolSectionRepository = $schoolSectionRepository;
         $this->courseRepository = $courseRepository;
         $this->semesterRepository = $semesterRepository;
+        $this->mediator = new MediatorMark();
     }
     /**
      * Display a listing of the resource.

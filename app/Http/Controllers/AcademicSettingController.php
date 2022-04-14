@@ -6,17 +6,19 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Interfaces\AcademicSettingInterface;
 use App\Http\Requests\AttendanceTypeUpdateRequest;
-use App\Mediator\MediatorRepository;
+use App\Mediator\Mediator;
+use App\Mediator\MediatorAcademicSetting;
 
 class AcademicSettingController extends Controller
 {
     protected $academicSettingRepository;
+    protected Mediator $mediator;
 
     public function __construct(
         AcademicSettingInterface $academicSettingRepository
     ) {
         $this->middleware(['can:view academic settings']);
-        $this->mediator = new MediatorRepository();
+        $this->mediator = new MediatorAcademicSetting();
         $this->academicSettingRepository = $academicSettingRepository;
     }
 

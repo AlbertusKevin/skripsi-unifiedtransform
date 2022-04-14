@@ -10,6 +10,8 @@ use App\Traits\SchoolSession;
 use App\Interfaces\SemesterInterface;
 use App\Interfaces\SchoolClassInterface;
 use App\Interfaces\SchoolSessionInterface;
+use App\Mediator\Mediator;
+use App\Mediator\MediatorExam;
 use App\Mediator\MediatorRepository;
 use App\Repositories\AssignedTeacherRepository;
 use App\Repositories\ExamRepository;
@@ -21,13 +23,14 @@ class ExamController extends Controller
     protected $schoolClassRepository;
     protected $semesterRepository;
     protected $schoolSessionRepository;
+    protected Mediator $mediator;
 
     public function __construct(SchoolSessionInterface $schoolSessionRepository, SchoolClassInterface $schoolClassRepository, SemesterInterface $semesterRepository)
     {
         $this->schoolSessionRepository = $schoolSessionRepository;
         $this->schoolClassRepository = $schoolClassRepository;
         $this->semesterRepository = $semesterRepository;
-        $this->mediator = new MediatorRepository();
+        $this->mediator = new MediatorExam();
     }
     /**
      * Display a listing of the resource.

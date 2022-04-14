@@ -11,6 +11,8 @@ use App\Interfaces\SchoolSessionInterface;
 use App\Interfaces\AcademicSettingInterface;
 use App\Http\Requests\AttendanceStoreRequest;
 use App\Interfaces\SectionInterface;
+use App\Mediator\Mediator;
+use App\Mediator\MediatorAttendance;
 use App\Mediator\MediatorRepository;
 use App\Repositories\AttendanceRepository;
 use App\Repositories\CourseRepository;
@@ -24,6 +26,7 @@ class AttendanceController extends Controller
     protected $schoolClassRepository;
     protected $sectionRepository;
     protected $userRepository;
+    protected Mediator $mediator;
 
     public function __construct(
         UserInterface $userRepository,
@@ -34,7 +37,7 @@ class AttendanceController extends Controller
     ) {
         $this->middleware(['can:view attendances']);
 
-        $this->mediator = new MediatorRepository();
+        $this->mediator = new MediatorAttendance();
         $this->userRepository = $userRepository;
         $this->academicSettingRepository = $academicSettingRepository;
         $this->schoolSessionRepository = $schoolSessionRepository;
