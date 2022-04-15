@@ -50,16 +50,10 @@ class AttendanceController extends TemplateMethod
      */
     public function create(Request $request)
     {
-        if($request->query('class_id') == null){
-            return abort(404);
-        }
-        
+        $this->isNullData($request,["class_id"]);
+        $param = $this->getQueryParameter($request, ["class_id","section_id", "course_id"]);
         try{
-            return view('attendances.take', $this->mediator->getData($this, "create", [
-                "class_id" => $request->query('class_id'),
-                "section_id" => $request->query('section_id', 0),
-                "course_id" => $request->query('course_id')
-            ]));
+            return view('attendances.take', $this->mediator->getData($this, "create", $param));
         } catch (\Exception $e) {
             return back()->withError($e->getMessage());
         }
@@ -91,16 +85,11 @@ class AttendanceController extends TemplateMethod
      */
     public function show(Request $request)
     {
-        if($request->query('class_id') == null){
-            return abort(404);
-        }
+        $this->isNullData($request,["class_id"]);
+        $param = $this->getQueryParameter($request, ["class_id","section_id", "course_id"]);
     
         try {
-            return view('attendances.view', $this->mediator->getData($this, "show", [
-                "class_id" => $request->query('class_id'),
-                "section_id" => $request->query('section_id'),
-                "course_id" => $request->query('course_id')
-            ]));
+            return view('attendances.view', $this->mediator->getData($this, "show", $param));
         } catch (\Exception $e) {
             return back()->withError($e->getMessage());
         }

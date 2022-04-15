@@ -8,11 +8,6 @@ use Illuminate\Http\Request;
 
 abstract class TemplateMethod extends Controller
 {
-    public function coba(){
-        
-        
-    }
-
     protected function prepareData(
         Request $request, 
         array $keys_param, 
@@ -34,7 +29,7 @@ abstract class TemplateMethod extends Controller
         $data = [];
 
         foreach($keys as $key){
-            $data[$key] = $request->query($key);
+            $data[$key] = $request->query($key,0);
         }
 
         return $data;
