@@ -41,7 +41,7 @@ class MediatorMark extends Mediator{
             return [
                 "marks" => $this->markRepository->getAllByStudentId($data["session_id"], $data["semester_id"], $data["class_id"], $data["section_id"], $data["course_id"], $data["student_id"]),
                 "final_marks" => $this->markRepository->getAllFinalMarksByStudentId($data["session_id"], $data["student_id"], $data["semester_id"], $data["class_id"], $data["section_id"], $data["course_id"]),
-                "gradingSystemRules" => (!$gradingSystem) ? null : $this->gradeRulesRepository->getAll($data["session_id"], $gradingSystem->id),
+                "grading_system_rules" => (!$gradingSystem) ? null : $this->gradeRulesRepository->getAll($data["session_id"], $gradingSystem->id),
                 'course_name' => $data["course_name"],
             ];
         }

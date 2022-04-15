@@ -2,14 +2,14 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Http\Requests\AttendanceStoreRequest;
 use App\Mediator\Mediator;
 use App\Mediator\MediatorAttendance;
 use App\Repositories\AttendanceRepository;
+use App\Template_Method\TemplateMethod;
 
-class AttendanceController extends Controller
+class AttendanceController extends TemplateMethod
 {
     protected Mediator $mediator;
 
@@ -61,7 +61,6 @@ class AttendanceController extends Controller
                 "course_id" => $request->query('course_id')
             ]));
         } catch (\Exception $e) {
-            dd($e->getMessage());
             return back()->withError($e->getMessage());
         }
     }
