@@ -1,5 +1,6 @@
 <?php
 
+use App\Decorator\EmailDecorator;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ExamController;
@@ -39,6 +40,8 @@ use App\Http\Controllers\Auth\UpdatePasswordController;
 Route::get('/', function () {
     return view('welcome');
 });
+
+Route::get('/coba-email', [EmailDecorator::class,'send_message']);
 
 Auth::routes();
 

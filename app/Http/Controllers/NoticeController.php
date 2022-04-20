@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Decorator\EmailDecorator;
+use App\Decorator\Message;
 use App\Http\Controllers\Controller;
 use App\Models\Notice;
 use Illuminate\Http\Request;
@@ -38,13 +40,17 @@ class NoticeController extends Controller
      */
     public function store(NoticeStoreRequest $request)
     {
-        try {
-            $noticeRepository = new NoticeRepository();
-            $noticeRepository->store($request->validated());
+        $request->validated();
+        $notice = new Message($request["notice"]);
+        $send_notice = $notice->send_message(["session_id" => $request['session_id']]);
+        
+        $email = new EmailDecorator($notice, $request["notice"]);
+        $email->send_message();
 
-            return back()->with('status', 'Creating Notice was successful!');
-        } catch (\Exception $e) {
-            return back()->withError($e->getMessage());
+        if(!$send_notice["error"]){
+            return back()->with('status', $send_notice["message"]);
         }
+
+        return back()->withError($send_notice["message"]);
     }
 }
