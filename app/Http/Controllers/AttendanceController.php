@@ -51,7 +51,7 @@ class AttendanceController extends TemplateMethod
     public function create(Request $request)
     {
         $this->isNullData($request,["class_id"]);
-        $param = $this->getQueryParameter($request, ["class_id","section_id", "course_id"]);
+        $param = $this->getQueryParameter($request, ["class_id" => 0,"section_id" => 0, "course_id" => 0]);
         try{
             return view('attendances.take', $this->mediator->getData($this, "create", $param));
         } catch (\Exception $e) {
@@ -86,7 +86,7 @@ class AttendanceController extends TemplateMethod
     public function show(Request $request)
     {
         $this->isNullData($request,["class_id"]);
-        $param = $this->getQueryParameter($request, ["class_id","section_id", "course_id"]);
+        $param = $this->getQueryParameter($request, ["class_id" => 0,"section_id" => 0, "course_id" => 0]);
     
         try {
             return view('attendances.view', $this->mediator->getData($this, "show", $param));

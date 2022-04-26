@@ -28,8 +28,8 @@ abstract class TemplateMethod extends Controller
     protected function getQueryParameter(Request $request, array $keys){
         $data = [];
 
-        foreach($keys as $key){
-            $data[$key] = $request->query($key,0);
+        foreach($keys as $key => $default_value){
+            $data[$key] = $request->query($key,$default_value);
         }
 
         return $data;

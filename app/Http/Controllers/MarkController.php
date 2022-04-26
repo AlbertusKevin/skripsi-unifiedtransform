@@ -27,8 +27,10 @@ class MarkController extends TemplateMethod
             $request,
             // keys untuk query param dari endpoint
             [
-                "class_id","section_id",
-                "course_id","semester_id"
+                "class_id" => 0,
+                "section_id" => 0,
+                "course_id" => 0,
+                "semester_id" => 0
             ],
             // keys untuk data apa yang ingin pengecekan null
             [
