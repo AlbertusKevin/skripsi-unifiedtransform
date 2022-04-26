@@ -9,8 +9,9 @@ use App\Interfaces\SemesterInterface;
 use App\Interfaces\SchoolSessionInterface;
 use App\Http\Requests\TeacherAssignRequest;
 use App\Repositories\AssignedTeacherRepository;
+use App\Template_Method\TemplateMethod;
 
-class AssignedTeacherController extends Controller
+class AssignedTeacherController extends TemplateMethod
 {
     use SchoolSession;
     protected $schoolSessionRepository;
@@ -31,17 +32,13 @@ class AssignedTeacherController extends Controller
     /**
      * Display a listing of the resource.
      *
-     * @param  CourseStoreRequest $request
+     * @param  Request $request
      * @return \Illuminate\Http\Response
      */
     public function getTeacherCourses(Request $request)
     {
-        $teacher_id = $request->query('teacher_id');
-        $semester_id = $request->query('semester_id');
-
-        if($teacher_id == null) {
-            abort(404);
-        }
+        $param = $this->getQueryParameter($request, ["teacher_id" => 0,"semester_id" => 0]);
+        $this->isNullData($param, ["teacher_id"]);
         
         $current_school_session_id = $this->getSchoolCurrentSession();
 
@@ -49,16 +46,16 @@ class AssignedTeacherController extends Controller
 
         $assignedTeacherRepository = new AssignedTeacherRepository();
 
-        if($semester_id == null) {
+        if($param["semester_id"] == null) {
             $courses = [];
         } else {
-            $courses = $assignedTeacherRepository->getTeacherCourses($current_school_session_id, $teacher_id, $semester_id);
+            $courses = $assignedTeacherRepository->getTeacherCourses($current_school_session_id, $param["teacher_id"], $param["semester_id"]);
         }
         
         $data = [
             'courses'               => $courses,
             'semesters'             => $semesters,
-            'selected_semester_id'  => $semester_id,
+            'selected_semester_id'  => $param["semester_id"],
         ];
 
         return view('courses.teacher', $data);

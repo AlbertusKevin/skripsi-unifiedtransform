@@ -176,12 +176,12 @@ class MarkController extends TemplateMethod
     {
         $data = $this->prepareData(
             $request,
-            // keys untuk query param dari endpoint
+            // keys untuk query param dari endpoint beserta nilai default
             [
-                "class_id","section_id",
-                "course_id","semester_id",
-                "session_id","course_name",
-                "student_id"
+                "class_id" => 0, "section_id" => 0,
+                "course_id" => 0, "semester_id" => 0,
+                "session_id" => 0, "course_name" => "",
+                "student_id" => 0
             ],
             // keys untuk data apa yang ingin pengecekan null, 
             //hasil pengambilan data dari mediator

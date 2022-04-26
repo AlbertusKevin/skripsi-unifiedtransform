@@ -10,8 +10,9 @@ use App\Traits\SchoolSession;
 use App\Repositories\RoutineRepository;
 use App\Interfaces\SchoolClassInterface;
 use App\Interfaces\SchoolSessionInterface;
+use App\Template_Method\TemplateMethod;
 
-class RoutineController extends Controller
+class RoutineController extends TemplateMethod
 {
     use SchoolSession;
     protected $schoolSessionRepository;
@@ -67,11 +68,14 @@ class RoutineController extends Controller
      */
     public function show(Request $request)
     {
-        $class_id = $request->query('class_id', 0);
-        $section_id = $request->query('section_id', 0);
+        $param = $this->getQueryParameter($request, [
+            "class_id" => 0,
+            "section_id" => 0,
+        ]);
+        
         $current_school_session_id = $this->getSchoolCurrentSession();
         $routineRepository = new RoutineRepository();
-        $routines = $routineRepository->getAll($class_id, $section_id, $current_school_session_id);
+        $routines = $routineRepository->getAll($param["class_id"], $param["section_id"], $current_school_session_id);
         $routines = $routines->sortBy('weekday')->groupBy('weekday');
 
         $data = [

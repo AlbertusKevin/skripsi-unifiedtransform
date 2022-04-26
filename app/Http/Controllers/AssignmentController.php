@@ -8,8 +8,9 @@ use App\Traits\SchoolSession;
 use App\Http\Requests\StoreFileRequest;
 use App\Interfaces\SchoolSessionInterface;
 use App\Repositories\AssignmentRepository;
+use App\Template_Method\TemplateMethod;
 
-class AssignmentController extends Controller
+class AssignmentController extends TemplateMethod
 {
     use SchoolSession;
     protected $schoolSessionRepository;
@@ -30,10 +31,11 @@ class AssignmentController extends Controller
      */
     public function getCourseAssignments(Request $request)
     {
-        $course_id = $request->query('course_id', 0);
+        $param = $this->getQueryParameter($request, ["course_id" => 0]);
+
         $current_school_session_id = $this->getSchoolCurrentSession();
         $assignmentRepository = new AssignmentRepository();
-        $assignments = $assignmentRepository->getAssignments($current_school_session_id, $course_id);
+        $assignments = $assignmentRepository->getAssignments($current_school_session_id, $param["course_id"]);
         $data = [
             'assignments'   => $assignments,
         ];
@@ -47,12 +49,18 @@ class AssignmentController extends Controller
      */
     public function create(Request $request)
     {
+        $param = $this->getQueryParameter($request, [
+            "class_id" => 0, 
+            "section_id" => 0, 
+            "course_id" => 0, 
+        ]);
+        
         $current_school_session_id = $this->getSchoolCurrentSession();
         $data = [
             'current_school_session_id' => $current_school_session_id,
-            'class_id'  => $request->query('class_id', 0),
-            'section_id'  => $request->query('section_id', 0),
-            'course_id'  => $request->query('course_id', 0),
+            'class_id'  => $param['class_id'],
+            'section_id'  => $param['section_id'],
+            'course_id'  => $param['course_id']
         ];
         return view('assignments.create', $data);
     }

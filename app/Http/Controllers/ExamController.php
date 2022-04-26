@@ -9,8 +9,9 @@ use App\Traits\SchoolSession;
 use App\Mediator\Mediator;
 use App\Mediator\MediatorExam;
 use App\Repositories\ExamRepository;
+use App\Template_Method\TemplateMethod;
 
-class ExamController extends Controller
+class ExamController extends TemplateMethod
 {
     protected Mediator $mediator;
 
@@ -26,11 +27,12 @@ class ExamController extends Controller
      */
     public function index(Request $request)
     {
-        return view('exams.index', $this->mediator->getData($this, "index", [
-            "class_id" => $request->query('class_id', 0),
-            "semester_id" => $request->query('semester_id', 0),
-            "teacher_id" => (auth()->user()->role == "teacher")?auth()->user()->id : 0
-        ]));
+        $data = $this->getQueryParameter($request, ['class_id' => 0, 'semester_id' => 0]);
+        return view('exams.index', $this->mediator->getData($this, "index", 
+            array_merge(
+                $data, ["teacher_id" => (auth()->user()->role == "teacher") ? auth()->user()->id : 0]
+            )
+        ));
     }
 
     /**

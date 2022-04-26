@@ -2,15 +2,15 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Traits\SchoolSession;
 use App\Repositories\PromotionRepository;
 use App\Interfaces\SchoolSessionInterface;
 use App\Mediator\Mediator;
 use App\Mediator\MediatorPromotion;
+use App\Template_Method\TemplateMethod;
 
-class PromotionController extends Controller
+class PromotionController extends TemplateMethod
 {
     use SchoolSession;
     protected Mediator $mediator;
@@ -49,19 +49,21 @@ class PromotionController extends Controller
      */
     public function create(Request $request)
     {
-        $class_id = $request->query('previous_class_id');
-        $section_id = $request->query('previous_section_id');
-        $session_id = $request->query('previousSessionId');
+        $param = $this->getQueryParameter($request, [
+            'previous_class_id' => 0,
+            'previous_section_id' => 0,
+            'previousSessionId' => 0
+        ]);
 
         try{
-            if($class_id == null || $section_id == null ||$session_id == null) {
+            if($param["class_id"] == null || $param["section_id"] == null ||$param["session_id"] == null) {
                 return abort(404);
             }
 
             $data = $this->mediator->getData($this, "create", [
-                "class_id" => $request->query('previous_class_id'),
-                "section_id" => $request->query('previous_section_id'),
-                "session_id" => $request->query('previousSessionId')
+                "class_id" => $param['previous_class_id'],
+                "section_id" => $param['previous_section_id'],
+                "session_id" => $param['previousSessionId']
             ]);
 
             return view('promotions.promote', $data);

@@ -13,8 +13,9 @@ use App\Http\Requests\StudentStoreRequest;
 use App\Http\Requests\TeacherStoreRequest;
 use App\Interfaces\SchoolSessionInterface;
 use App\Repositories\StudentParentInfoRepository;
+use App\Template_Method\TemplateMethod;
 
-class UserController extends Controller
+class UserController extends TemplateMethod
 {
     use SchoolSession;
     protected $userRepository;
@@ -53,12 +54,15 @@ class UserController extends Controller
 
     public function getStudentList(Request $request) {
         $current_school_session_id = $this->getSchoolCurrentSession();
-        $class_id = $request->query('class_id', 0);
-        $section_id = $request->query('section_id', 0);
+
+        $param = $this->getQueryParameter($request, [
+            "class_id" => 0,
+            "section_id" => 0
+        ]);
 
         try{
             $school_classes = $this->schoolClassRepository->getAllBySession($current_school_session_id);
-            $studentList = $this->userRepository->getAllStudents($current_school_session_id, $class_id, $section_id);
+            $studentList = $this->userRepository->getAllStudents($current_school_session_id, $param["class_id"], $param["section_id"]);
 
             $data = [
                 'studentList'       => $studentList,

@@ -29,7 +29,7 @@ abstract class TemplateMethod extends Controller
         $data = [];
 
         foreach($keys as $key => $default_value){
-            $data[$key] = $request->query($key,$default_value);
+            $data[$key] = $request->query($key, $default_value);
         }
 
         return $data;
