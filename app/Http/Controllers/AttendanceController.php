@@ -2,14 +2,14 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Http\Requests\AttendanceStoreRequest;
 use App\Mediator\Mediator;
 use App\Mediator\MediatorAttendance;
 use App\Repositories\AttendanceRepository;
+use App\Template_Method\TemplateMethod;
 
-class AttendanceController extends Controller
+class AttendanceController extends TemplateMethod
 {
     protected Mediator $mediator;
 
@@ -50,18 +50,11 @@ class AttendanceController extends Controller
      */
     public function create(Request $request)
     {
-        if($request->query('class_id') == null){
-            return abort(404);
-        }
-        
+        $this->isNullData($request,["class_id"]);
+        $param = $this->getQueryParameter($request, ["class_id" => 0,"section_id" => 0, "course_id" => 0]);
         try{
-            return view('attendances.take', $this->mediator->getData($this, "create", [
-                "class_id" => $request->query('class_id'),
-                "section_id" => $request->query('section_id', 0),
-                "course_id" => $request->query('course_id')
-            ]));
+            return view('attendances.take', $this->mediator->getData($this, "create", $param));
         } catch (\Exception $e) {
-            dd($e->getMessage());
             return back()->withError($e->getMessage());
         }
     }
@@ -92,16 +85,11 @@ class AttendanceController extends Controller
      */
     public function show(Request $request)
     {
-        if($request->query('class_id') == null){
-            return abort(404);
-        }
+        $this->isNullData($request,["class_id"]);
+        $param = $this->getQueryParameter($request, ["class_id" => 0,"section_id" => 0, "course_id" => 0]);
     
         try {
-            return view('attendances.view', $this->mediator->getData($this, "show", [
-                "class_id" => $request->query('class_id'),
-                "section_id" => $request->query('section_id'),
-                "course_id" => $request->query('course_id')
-            ]));
+            return view('attendances.view', $this->mediator->getData($this, "show", $param));
         } catch (\Exception $e) {
             return back()->withError($e->getMessage());
         }

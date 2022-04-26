@@ -2,18 +2,14 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use App\Traits\SchoolSession;
 use App\Repositories\MarkRepository;
-use App\Traits\AssignedTeacherCheck;
 use App\Mediator\Mediator;
 use App\Mediator\MediatorMark;
+use App\Template_Method\TemplateMethod;
 
-class MarkController extends Controller
+class MarkController extends TemplateMethod
 {
-    use SchoolSession, AssignedTeacherCheck;
-
     protected Mediator $mediator;
 
     public function __construct() {
@@ -27,29 +23,21 @@ class MarkController extends Controller
      */
     public function index(Request $request)
     {
-        $data = $this->mediator->getData($this,"index",[
-            "class_id" => $request->query('class_id', 0),
-            "section_id" => $request->query('section_id', 0),
-            "course_id" => $request->query('course_id', 0),
-            "semester_id" => $request->query('semester_id', 0)
-        ]);
-        
-        if(!$data["marks"]) {
-            return abort(404);
-        }
-
-        if(!$data["grading_system_rules"]) {
-            return abort(404);
-        }
-
-        foreach($data["marks"] as $mark_key => $mark) {
-            foreach ($data["grading_system_rules"] as $key => $gradingSystemRule) {
-                if($mark->final_marks >= $gradingSystemRule->start_at && $mark->final_marks <= $gradingSystemRule->end_at) {
-                    $data["marks"][$mark_key]['point'] = $gradingSystemRule->point;
-                    $data["marks"][$mark_key]['grade'] = $gradingSystemRule->grade;
-                }
-            }
-        }
+        $data = $this->prepareData(
+            $request,
+            // keys untuk query param dari endpoint
+            [
+                "class_id" => 0,
+                "section_id" => 0,
+                "course_id" => 0,
+                "semester_id" => 0
+            ],
+            // keys untuk data apa yang ingin pengecekan null
+            [
+                "marks", "grading_system_rules"
+            ],
+            // keys untuk data mark yang diinginkan
+            "marks", $this->mediator, $this, "index");
 
         return view('marks.results', $data);
     }
@@ -186,33 +174,22 @@ class MarkController extends Controller
 
     public function showCourseMark(Request $request)
     {
-        $data = $this->mediator->getData($this,"show_course_mark",[
-            "class_id" => $request->query('class_id'),
-            "section_id" => $request->query('section_id'),
-            "course_id" => $request->query('course_id'),
-            "semester_id" => $request->query('semester_id'),
-            "session_id" => $request->query('session_id'),
-            "course_name" => $request->query('course_name'),
-            "student_id" => $request->query('student_id')
-        ]);
-
-        if(!$data["final_marks"]) {
-            return abort(404);
-        }
-
-        if(!$data["gradingSystemRules"]) {
-            return abort(404);
-        }
-
-        foreach($data["final_marks"] as $mark_key => $mark) {
-            foreach ($data["gradingSystemRules"] as $key => $gradingSystemRule) {
-                if($mark->final_marks >= $gradingSystemRule->start_at && $mark->final_marks <= $gradingSystemRule->end_at) {
-                    $data["final_marks"][$mark_key]['point'] = $gradingSystemRule->point;
-                    $data["final_marks"][$mark_key]['grade'] = $gradingSystemRule->grade;
-                }
-            }
-        }
-
+        $data = $this->prepareData(
+            $request,
+            // keys untuk query param dari endpoint
+            [
+                "class_id","section_id",
+                "course_id","semester_id",
+                "session_id","course_name",
+                "student_id"
+            ],
+            // keys untuk data apa yang ingin pengecekan null, 
+            //hasil pengambilan data dari mediator
+            [
+                "final_marks", "grading_system_rules"
+            ],
+            // keys untuk data mark yang diinginkan
+            "final_marks", $this->mediator, $this, "show_course_mark");
         return view('marks.student', $data);
     }
 }
