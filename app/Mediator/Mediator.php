@@ -20,13 +20,15 @@ use App\Traits\AssignedTeacherCheck;
 use App\Traits\SchoolSession;
 use App\Traits\StrategyContext;
 
+// define("TEACHER", 'TEACHER');
+// define("STUDENT", 'STUDENT');
+
 abstract class Mediator{
     use SchoolSession, AssignedTeacherCheck, StrategyContext;
     protected AcademicSettingRepository $academicSettingRepository;
     protected SchoolSessionRepository $schoolSessionRepository;
     protected SchoolClassRepository $schoolClassRepository;
     protected SectionRepository $schoolSectionRepository;
-    protected $userRepository;
     protected ContextUserRepository $context;
     protected CourseRepository $courseRepository;
     protected SemesterRepository $semesterRepository;
@@ -57,6 +59,7 @@ abstract class Mediator{
         $this->markRepository = new MarkRepository();
         $this->gradeSystemRepository = new GradingSystemRepository();
         $this->gradeRulesRepository = new GradeRuleRepository();
+        $this->context = new ContextUserRepository();
 
         $this->school_session_id = $this->getSchoolCurrentSession();
         $this->academic_setting = $this->academicSettingRepository->getAcademicSetting();

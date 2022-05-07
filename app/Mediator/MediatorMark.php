@@ -8,6 +8,7 @@ class MediatorMark extends Mediator{
     protected array $type;
 
     public function __construct() {
+        parent::__construct();
         $this->type = [
             "MARK" => "MARK",
             "FINAL_MARK" => "FINAL_MARK"
