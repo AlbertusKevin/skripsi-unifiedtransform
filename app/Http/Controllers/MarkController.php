@@ -23,6 +23,7 @@ class MarkController extends Controller
 {
     use SchoolSession, AssignedTeacherCheck;
 
+    protected array $type;
     protected $academicSettingRepository;
     protected $userRepository;
     protected $schoolClassRepository;
@@ -47,6 +48,10 @@ class MarkController extends Controller
         $this->schoolSectionRepository = $schoolSectionRepository;
         $this->courseRepository = $courseRepository;
         $this->semesterRepository = $semesterRepository;
+        $this->type = [
+            "MARK" => "MARK",
+            "FINAL_MARK" => "FINAL_MARK"
+        ];
     }
     /**
      * Display a listing of the resource.
@@ -65,7 +70,16 @@ class MarkController extends Controller
         $semesters = $this->semesterRepository->getAll($current_school_session_id);
         $school_classes = $this->schoolClassRepository->getAllBySession($current_school_session_id);
         $markRepository = new MarkRepository();
-        $marks = $markRepository->getAllFinalMarks($current_school_session_id, $semester_id, $class_id, $section_id, $course_id);
+        // $marks = $markRepository->getAllFinalMarks($current_school_session_id, $semester_id, $class_id, $section_id, $course_id);
+        $filter = [
+            "session_id" => $current_school_session_id,
+            "semester_id" => $semester_id,
+            "class_id" => $class_id,
+            "section_id" => $section_id,
+            "course_id" => $course_id
+        ];
+        $pivotData = ["student"];
+        $marks = $markRepository->getMarks($filter, $this->type["FINAL_MARK"], $pivotData);
 
         if(!$marks) {
             return abort(404);
@@ -125,11 +139,25 @@ class MarkController extends Controller
             $examRepository = new ExamRepository();
             $exams = $examRepository->getAll($current_school_session_id, $semester_id, $class_id);
             $markRepository = new MarkRepository();
-            $studentsWithMarks = $markRepository->getAll($current_school_session_id, $semester_id, $class_id, $section_id, $course_id);
+            
+            // $studentsWithMarks = $markRepository->getAll($current_school_session_id, $semester_id, $class_id, $section_id, $course_id);
+            $filter = [
+                "exam_id" => true,
+                "session_id" => $current_school_session_id,
+                "semester_id" => $semester_id,
+                "class_id" => $class_id,
+                "section_id" => $section_id,
+                "course_id" => $course_id
+            ];
+
+            $pivotData = ['student','exam'];
+            $studentsWithMarks = $markRepository->getMarks($filter, $this->type["MARK"], $pivotData);
             $studentsWithMarks = $studentsWithMarks->groupBy('student_id');
+
             $sectionStudents = $this->userRepository->getAllStudents($current_school_session_id, $class_id, $section_id);
             $final_marks_submitted = false;
             $final_marks_submit_count = $markRepository->getFinalMarksCount($current_school_session_id, $semester_id, $class_id, $section_id, $course_id);
+            // $final_marks_submit_count = $markRepository->getMarks($data, $this->type["FINAL_MARK"]);
 
             if($final_marks_submit_count > 0) {
                 $final_marks_submitted = true;
@@ -169,7 +197,20 @@ class MarkController extends Controller
 
         $current_school_session_id = $this->getSchoolCurrentSession();
         $markRepository = new MarkRepository();
-        $studentsWithMarks = $markRepository->getAll($current_school_session_id, $semester_id, $class_id, $section_id, $course_id);
+        // $studentsWithMarks = $markRepository->getAll($current_school_session_id, $semester_id, $class_id, $section_id, $course_id);
+
+        $filter = [
+            "exam_id" => true,
+            "session_id" => $current_school_session_id,
+            "semester_id" => $semester_id,
+            "class_id" => $class_id,
+            "section_id" => $section_id,
+            "course_id" => $course_id
+        ];
+
+        $pivotData = ['student','exam'];
+
+        $studentsWithMarks = $markRepository->getMarks($filter, $this->type["MARK"], $pivotData);
         $studentsWithMarks = $studentsWithMarks->groupBy('student_id');
 
         $data = [
@@ -264,6 +305,7 @@ class MarkController extends Controller
      */
     public function showCourseMark(Request $request)
     {
+        
         $session_id = $request->query('session_id');
         $semester_id = $request->query('semester_id');
         $class_id = $request->query('class_id');
@@ -271,9 +313,25 @@ class MarkController extends Controller
         $course_id = $request->query('course_id');
         $course_name = $request->query('course_name');
         $student_id = $request->query('student_id');
+
         $markRepository = new MarkRepository();
-        $marks = $markRepository->getAllByStudentId($session_id, $semester_id, $class_id, $section_id, $course_id, $student_id);
-        $finalMarks = $markRepository->getAllFinalMarksByStudentId($session_id, $student_id, $semester_id, $class_id, $section_id, $course_id);
+        // $marks = $markRepository->getAllByStudentId($session_id, $semester_id, $class_id, $section_id, $course_id, $student_id);
+        // $finalMarks = $markRepository->getAllFinalMarksByStudentId($session_id, $student_id, $semester_id, $class_id, $section_id, $course_id);
+        $filter = [
+            "exam_id" => true,
+            "session_id" => $session_id,
+            "semester_id" => $semester_id,
+            "class_id" => $class_id,
+            "section_id" => $section_id,
+            "course_id" => $course_id,
+            "student_id" => $student_id
+        ];
+        $pivotData = ['student','exam'];
+        $marks = $markRepository->getMarks($filter, $this->type["MARK"], $pivotData);
+
+        unset($filter["exam_id"]);
+        $pivotData = ['student'];
+        $finalMarks = $markRepository->getMarks($filter, $this->type["FINAL_MARK"], $pivotData);
 
         if(!$finalMarks) {
             return abort(404);
@@ -282,17 +340,18 @@ class MarkController extends Controller
         $gradingSystemRepository = new GradingSystemRepository();
         $gradingSystem = $gradingSystemRepository->getGradingSystem($session_id, $semester_id, $class_id);
 
+        
         if(!$gradingSystem) {
             return abort(404);
         }
-
+        
         $gradeRulesRepository = new GradeRuleRepository();
         $gradingSystemRules = $gradeRulesRepository->getAll($session_id, $gradingSystem->id);
-
+        
         if(!$gradingSystemRules) {
             return abort(404);
         }
-
+        
         foreach($finalMarks as $mark_key => $mark) {
             foreach ($gradingSystemRules as $key => $gradingSystemRule) {
                 if($mark->final_marks >= $gradingSystemRule->start_at && $mark->final_marks <= $gradingSystemRule->end_at) {
@@ -302,6 +361,7 @@ class MarkController extends Controller
             }
         }
 
+        // dd("oy");
         $data = [
             'marks' => $marks,
             'final_marks'   => $finalMarks,
