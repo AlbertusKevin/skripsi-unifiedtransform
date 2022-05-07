@@ -2,56 +2,25 @@
 
 namespace App\Http\Controllers;
 
-use App\Strategy\ContextUserRepository;
-use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use App\Traits\SchoolSession;
-use App\Interfaces\CourseInterface;
-use App\Interfaces\SectionInterface;
-use App\Repositories\ExamRepository;
 use App\Repositories\MarkRepository;
-use App\Traits\AssignedTeacherCheck;
-use App\Interfaces\SemesterInterface;
-use App\Interfaces\SchoolClassInterface;
-use App\Repositories\GradeRuleRepository;
-use App\Interfaces\SchoolSessionInterface;
-use App\Interfaces\AcademicSettingInterface;
-use App\Repositories\GradingSystemRepository;
-use App\Traits\StrategyContext;
+use App\Mediator\Mediator;
+use App\Mediator\MediatorMark;
+use App\Template_Method\TemplateMethod;
 
-class MarkController extends Controller
+class MarkController extends TemplateMethod
 {
-    use SchoolSession, AssignedTeacherCheck, StrategyContext;
-
     protected array $type;
-    private ContextUserRepository $context;
-    protected $academicSettingRepository;
-    protected $schoolClassRepository;
-    protected $schoolSectionRepository;
-    protected $courseRepository;
-    protected $semesterRepository;
-    protected $schoolSessionRepository;
+    protected Mediator $mediator;
 
-    public function __construct(
-        AcademicSettingInterface $academicSettingRepository,
-        SchoolSessionInterface $schoolSessionRepository,
-        SchoolClassInterface $schoolClassRepository,
-        SectionInterface $schoolSectionRepository,
-        CourseInterface $courseRepository,
-        SemesterInterface $semesterRepository
-    ) {
-        $this->context = new ContextUserRepository();
-        $this->academicSettingRepository = $academicSettingRepository;
-        $this->schoolSessionRepository = $schoolSessionRepository;
-        $this->schoolClassRepository = $schoolClassRepository;
-        $this->schoolSectionRepository = $schoolSectionRepository;
-        $this->courseRepository = $courseRepository;
-        $this->semesterRepository = $semesterRepository;
+    public function __construct() {
+        $this->mediator = new MediatorMark();
         $this->type = [
             "MARK" => "MARK",
             "FINAL_MARK" => "FINAL_MARK"
         ];
     }
+
     /**
      * Display a listing of the resource.
      *
@@ -60,60 +29,21 @@ class MarkController extends Controller
      */
     public function index(Request $request)
     {
-        $class_id = $request->query('class_id', 0);
-        $section_id = $request->query('section_id', 0);
-        $course_id = $request->query('course_id', 0);
-        $semester_id = $request->query('semester_id', 0);
-
-        $current_school_session_id = $this->getSchoolCurrentSession();
-        $semesters = $this->semesterRepository->getAll($current_school_session_id);
-        $school_classes = $this->schoolClassRepository->getAllBySession($current_school_session_id);
-        $markRepository = new MarkRepository();
-        // $marks = $markRepository->getAllFinalMarks($current_school_session_id, $semester_id, $class_id, $section_id, $course_id);
-        $filter = [
-            "session_id" => $current_school_session_id,
-            "semester_id" => $semester_id,
-            "class_id" => $class_id,
-            "section_id" => $section_id,
-            "course_id" => $course_id
-        ];
-        $pivotData = ["student"];
-        $marks = $markRepository->getMarks($filter, $this->type["FINAL_MARK"], $pivotData);
-
-        if(!$marks) {
-            return abort(404);
-        }
-
-        $gradingSystemRepository = new GradingSystemRepository();
-        $gradingSystem = $gradingSystemRepository->getGradingSystem($current_school_session_id, $semester_id, $class_id);
-
-        if(!$gradingSystem) {
-            return abort(404);
-        }
-
-        $gradeRulesRepository = new GradeRuleRepository();
-        $gradingSystemRules = $gradeRulesRepository->getAll($current_school_session_id, $gradingSystem->id);
-
-        if(!$gradingSystemRules) {
-            return abort(404);
-        }
-
-        foreach($marks as $mark_key => $mark) {
-            foreach ($gradingSystemRules as $key => $gradingSystemRule) {
-                if($mark->final_marks >= $gradingSystemRule->start_at && $mark->final_marks <= $gradingSystemRule->end_at) {
-                    $marks[$mark_key]['point'] = $gradingSystemRule->point;
-                    $marks[$mark_key]['grade'] = $gradingSystemRule->grade;
-                }
-            }
-        }
-
-        $data = [
-            'current_school_session_id' => $current_school_session_id,
-            'semesters'                 => $semesters,
-            'classes'                   => $school_classes,
-            'marks'                     => $marks,
-            'grading_system_rules'      => $gradingSystemRules,
-        ];
+        $data = $this->prepareData(
+            $request,
+            // keys untuk query param dari endpoint
+            [
+                "class_id" => 0,
+                "section_id" => 0,
+                "course_id" => 0,
+                "semester_id" => 0
+            ],
+            // keys untuk data apa yang ingin pengecekan null
+            [
+                "marks", "grading_system_rules"
+            ],
+            // keys untuk data mark yang diinginkan
+            "marks", $this->mediator, $this, "index");
 
         return view('marks.results', $data);
     }
@@ -126,63 +56,14 @@ class MarkController extends Controller
      */
     public function create(Request $request)
     {
-        $class_id = $request->query('class_id');
-        $section_id = $request->query('section_id');
-        $course_id = $request->query('course_id');
-        $semester_id = $request->query('semester_id', 0);
-        
         try{
-            $current_school_session_id = $this->getSchoolCurrentSession();
-            $this->checkIfLoggedInUserIsAssignedTeacher($request, $current_school_session_id);
-            $academic_setting = $this->academicSettingRepository->getAcademicSetting();
-            $examRepository = new ExamRepository();
-            $exams = $examRepository->getAll($current_school_session_id, $semester_id, $class_id);
-            $markRepository = new MarkRepository();
-            
-            // $studentsWithMarks = $markRepository->getAll($current_school_session_id, $semester_id, $class_id, $section_id, $course_id);
-            $filter = [
-                "exam_id" => true,
-                "session_id" => $current_school_session_id,
-                "semester_id" => $semester_id,
-                "class_id" => $class_id,
-                "section_id" => $section_id,
-                "course_id" => $course_id
-            ];
-
-            $pivotData = ['student','exam'];
-            $studentsWithMarks = $markRepository->getMarks($filter, $this->type["MARK"], $pivotData);
-            $studentsWithMarks = $studentsWithMarks->groupBy('student_id');
-
-            $this->setStrategyContext(STUDENT);
-            $data = [
-                "session_id" => $current_school_session_id, 
-                "class_id" => $class_id, 
-                "section_id" => $section_id, 
-            ];
-
-            $sectionStudents = $this->context->executeGetAll($data);
-            $final_marks_submitted = false;
-            $final_marks_submit_count = $markRepository->getFinalMarksCount($current_school_session_id, $semester_id, $class_id, $section_id, $course_id);
-            // $final_marks_submit_count = $markRepository->getMarks($data, $this->type["FINAL_MARK"]);
-
-            if($final_marks_submit_count > 0) {
-                $final_marks_submitted = true;
-            }
-
-            $data = [
-                'academic_setting'          => $academic_setting,
-                'exams'                     => $exams,
-                'students_with_marks'       => $studentsWithMarks,
-                'class_id'                  => $class_id,
-                'section_id'                => $section_id,
-                'course_id'                 => $course_id,
-                'semester_id'               => $semester_id,
-                'final_marks_submitted'     => $final_marks_submitted,
-                'sectionStudents'           => $sectionStudents,
-                'current_school_session_id' => $current_school_session_id,
-            ];
-
-            return view('marks.create', $data);
+            return view('marks.create', $this->mediator->getData($this,"create",[
+                "request" => $request,
+                "class_id" => $request->query('class_id'),
+                "section_id" => $request->query('section_id'),
+                "course_id" => $request->query('course_id'),
+                "semester_id" => $request->query('semester_id', 0),
+            ]));
         } catch (\Exception $e) {
             return back()->withError($e->getMessage());
         }
@@ -215,9 +96,8 @@ class MarkController extends Controller
         ];
 
         $pivotData = ['student','exam'];
-
-        $studentsWithMarks = $markRepository->getMarks($filter, $this->type["MARK"], $pivotData);
-        $studentsWithMarks = $studentsWithMarks->groupBy('student_id');
+        $studentsWithMarks = $markRepository->getMarks($filter, $this->type["MARK"], $pivotData)
+                                ->groupBy('student_id');
 
         $data = [
             'students_with_marks'       => $studentsWithMarks,
@@ -309,71 +189,25 @@ class MarkController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
+
     public function showCourseMark(Request $request)
     {
-        
-        $session_id = $request->query('session_id');
-        $semester_id = $request->query('semester_id');
-        $class_id = $request->query('class_id');
-        $section_id = $request->query('section_id');
-        $course_id = $request->query('course_id');
-        $course_name = $request->query('course_name');
-        $student_id = $request->query('student_id');
-
-        $markRepository = new MarkRepository();
-        // $marks = $markRepository->getAllByStudentId($session_id, $semester_id, $class_id, $section_id, $course_id, $student_id);
-        // $finalMarks = $markRepository->getAllFinalMarksByStudentId($session_id, $student_id, $semester_id, $class_id, $section_id, $course_id);
-        $filter = [
-            "exam_id" => true,
-            "session_id" => $session_id,
-            "semester_id" => $semester_id,
-            "class_id" => $class_id,
-            "section_id" => $section_id,
-            "course_id" => $course_id,
-            "student_id" => $student_id
-        ];
-        $pivotData = ['student','exam'];
-        $marks = $markRepository->getMarks($filter, $this->type["MARK"], $pivotData);
-
-        unset($filter["exam_id"]);
-        $pivotData = ['student'];
-        $finalMarks = $markRepository->getMarks($filter, $this->type["FINAL_MARK"], $pivotData);
-
-        if(!$finalMarks) {
-            return abort(404);
-        }
-
-        $gradingSystemRepository = new GradingSystemRepository();
-        $gradingSystem = $gradingSystemRepository->getGradingSystem($session_id, $semester_id, $class_id);
-
-        
-        if(!$gradingSystem) {
-            return abort(404);
-        }
-        
-        $gradeRulesRepository = new GradeRuleRepository();
-        $gradingSystemRules = $gradeRulesRepository->getAll($session_id, $gradingSystem->id);
-        
-        if(!$gradingSystemRules) {
-            return abort(404);
-        }
-        
-        foreach($finalMarks as $mark_key => $mark) {
-            foreach ($gradingSystemRules as $key => $gradingSystemRule) {
-                if($mark->final_marks >= $gradingSystemRule->start_at && $mark->final_marks <= $gradingSystemRule->end_at) {
-                    $finalMarks[$mark_key]['point'] = $gradingSystemRule->point;
-                    $finalMarks[$mark_key]['grade'] = $gradingSystemRule->grade;
-                }
-            }
-        }
-
-        // dd("oy");
-        $data = [
-            'marks' => $marks,
-            'final_marks'   => $finalMarks,
-            'course_name' => $course_name,
-        ];
-
+        $data = $this->prepareData(
+            $request,
+            // keys untuk query param dari endpoint
+            [
+                "class_id","section_id",
+                "course_id","semester_id",
+                "session_id","course_name",
+                "student_id"
+            ],
+            // keys untuk data apa yang ingin pengecekan null, 
+            //hasil pengambilan data dari mediator
+            [
+                "final_marks", "grading_system_rules"
+            ],
+            // keys untuk data mark yang diinginkan
+            "final_marks", $this->mediator, $this, "show_course_mark");
         return view('marks.student', $data);
     }
 }
