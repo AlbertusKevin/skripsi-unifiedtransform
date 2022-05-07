@@ -181,7 +181,6 @@ return [
         App\Providers\SchoolClassServiceProvider::class,
         App\Providers\SectionServiceProvider::class,
         App\Providers\CourseServiceProvider::class,
-        App\Providers\UserServiceProvider::class,
         App\Providers\PurifySetupProvider::class,
     ],
 

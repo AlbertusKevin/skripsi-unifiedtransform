@@ -6,20 +6,21 @@ use App\Http\Controllers\Controller;
 use App\Models\Promotion;
 use Illuminate\Http\Request;
 use App\Traits\SchoolSession;
-use App\Interfaces\UserInterface;
 use App\Interfaces\SectionInterface;
 use App\Interfaces\SchoolClassInterface;
 use App\Repositories\PromotionRepository;
 use App\Interfaces\SchoolSessionInterface;
+use App\Strategy\ContextUserRepository;
+use App\Traits\StrategyContext;
 
 class PromotionController extends Controller
 {
-    use SchoolSession;
+    use SchoolSession, StrategyContext;
 
     protected $schoolSessionRepository;
-    protected $userRepository;
     protected $schoolClassRepository;
     protected $schoolSectionRepository;
+    private ContextUserRepository $context;
 
     /**
     * Create a new Controller instance
@@ -29,12 +30,11 @@ class PromotionController extends Controller
     */
     public function __construct(
         SchoolSessionInterface $schoolSessionRepository,
-        UserInterface $userRepository,
         SchoolClassInterface $schoolClassRepository,
         SectionInterface $schoolSectionRepository
     ) {
+        $this->context = new ContextUserRepository();
         $this->schoolSessionRepository = $schoolSessionRepository;
-        $this->userRepository = $userRepository;
         $this->schoolClassRepository = $schoolClassRepository;
         $this->schoolSectionRepository = $schoolSectionRepository;
     }
@@ -89,7 +89,14 @@ class PromotionController extends Controller
                 return abort(404);
             }
 
-            $students = $this->userRepository->getAllStudents($session_id, $class_id, $section_id);
+            $data = [
+                "session_id" => $session_id, 
+                "class_id" => $class_id, 
+                "section_id" => $section_id, 
+            ];
+
+            $this->setStrategyContext(STUDENT);
+            $students = $this->context->executeGetAll($data);
             $schoolClass = $this->schoolClassRepository->findById($class_id);
             $section = $this->schoolSectionRepository->findById($section_id);
             $latest_school_session = $this->schoolSessionRepository->getLatestSession();

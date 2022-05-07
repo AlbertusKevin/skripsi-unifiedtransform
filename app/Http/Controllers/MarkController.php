@@ -2,11 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Strategy\ContextUserRepository;
 use App\Http\Controllers\Controller;
-use App\Models\Mark;
 use Illuminate\Http\Request;
 use App\Traits\SchoolSession;
-use App\Interfaces\UserInterface;
 use App\Interfaces\CourseInterface;
 use App\Interfaces\SectionInterface;
 use App\Repositories\ExamRepository;
@@ -18,14 +17,15 @@ use App\Repositories\GradeRuleRepository;
 use App\Interfaces\SchoolSessionInterface;
 use App\Interfaces\AcademicSettingInterface;
 use App\Repositories\GradingSystemRepository;
+use App\Traits\StrategyContext;
 
 class MarkController extends Controller
 {
-    use SchoolSession, AssignedTeacherCheck;
+    use SchoolSession, AssignedTeacherCheck, StrategyContext;
 
     protected array $type;
+    private ContextUserRepository $context;
     protected $academicSettingRepository;
-    protected $userRepository;
     protected $schoolClassRepository;
     protected $schoolSectionRepository;
     protected $courseRepository;
@@ -34,15 +34,14 @@ class MarkController extends Controller
 
     public function __construct(
         AcademicSettingInterface $academicSettingRepository,
-        UserInterface $userRepository,
         SchoolSessionInterface $schoolSessionRepository,
         SchoolClassInterface $schoolClassRepository,
         SectionInterface $schoolSectionRepository,
         CourseInterface $courseRepository,
         SemesterInterface $semesterRepository
     ) {
+        $this->context = new ContextUserRepository();
         $this->academicSettingRepository = $academicSettingRepository;
-        $this->userRepository = $userRepository;
         $this->schoolSessionRepository = $schoolSessionRepository;
         $this->schoolClassRepository = $schoolClassRepository;
         $this->schoolSectionRepository = $schoolSectionRepository;
@@ -154,7 +153,14 @@ class MarkController extends Controller
             $studentsWithMarks = $markRepository->getMarks($filter, $this->type["MARK"], $pivotData);
             $studentsWithMarks = $studentsWithMarks->groupBy('student_id');
 
-            $sectionStudents = $this->userRepository->getAllStudents($current_school_session_id, $class_id, $section_id);
+            $this->setStrategyContext(STUDENT);
+            $data = [
+                "session_id" => $current_school_session_id, 
+                "class_id" => $class_id, 
+                "section_id" => $section_id, 
+            ];
+
+            $sectionStudents = $this->context->executeGetAll($data);
             $final_marks_submitted = false;
             $final_marks_submit_count = $markRepository->getFinalMarksCount($current_school_session_id, $semester_id, $class_id, $section_id, $course_id);
             // $final_marks_submit_count = $markRepository->getMarks($data, $this->type["FINAL_MARK"]);
